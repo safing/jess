@@ -43,6 +43,16 @@ And because we also have Bob's secret key, we can also go ahead and decrypt the 
 
 Normally, of course, you would have a friend send you their `recipient` file (public key) and you would add it to your trust store.
 
+In order to help you not screw up any configuration, Jess has the concept of __requirements__:
+- Confidentiality ... hide contents
+- Integrity ... check that nothing was modified
+- Recipient Authentication ... verify identity of recipient
+- Sender Authentication ... verify identity of sender
+
+By default, all of them are required. If you, for some reason, do not require one ore more of them, you will have to disable them in the envelope for closing an envelope (encrypting) and pass the reduced requirements when opening a letter (decrypting).
+
+In addition, if you are worried about weak algorithms, you can just pass a minimum security level (attack complexity as 2^n) that you require all algorithms to achieve. Jess does not contain any known weak algorithms, but if that changes, jess will warn you - after you upgraded to the new version.
+
 Jess does not have a PKI or some sort of web of trust. You have to exchange public keys by yourself.
 
 Jess is also capable of securing a network connection, but this currently only works with the library, not the CLI.
@@ -65,14 +75,14 @@ cd cmd
 Before we dive into technical details, here are some more/updated terms:
 - __Tool/Scheme__ a cryptographic primitive/scheme
   - Identified via their Name/ID (used interchangeably)
-- __Signet/Recipient__ the
+- __Signet/Recipient__ a private/secret or public key
   - Identified by their ID (usually a UUID)
-- __Envelope__ hold configuration, but also requirements
+- __Envelope__ an encryption configuration, but also requirements
   - Identified by the name given to them
 
 Every algorithm/piece that can be used to _build_ a complete encryption operation is called a Tool. Tools have different capabilites and might cover more than just one primitive - eg. AES-GCM covers _Confidentiality_ and _Integrity_.
 
-Tinker can either operate in _single-op_ (eg. file encryption) or _communication_ (eg. securing network traffic) mode.
+Jess can either operate in _single-op_ (eg. file encryption) or _communication_ (eg. securing network traffic) mode.
 
 Basically, every operation needs:
 - _SenderAuthentication_ and _ReceiverAuthentication_:
@@ -98,9 +108,14 @@ Should any of these properties _not_ be required, the user has to intentionally 
 
 ### Specification
 
-There is some more detail in `SPEC.md`.
+There is some more detail in [SPEC.md](./SPEC.md).
 
 ### Testing
+
+Basically, tests are run like this:
+```
+go test
+```
 
 There is a special variable to enable very comprehensive testing:
 
