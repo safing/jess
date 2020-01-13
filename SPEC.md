@@ -83,7 +83,7 @@ k->s: "derive new session key (wire only)"
 k->e: "derive key for encryption algorithm"
 k->e: "derive nonce for encryption algorithm"
 k->i: "derive key for integrity algorithm"
-k->i: "derive nonce for encryption algorithm"
+k->i: "derive nonce for integrity algorithm"
 e->e: "encrypt/decrypt"
 i->i: "calculate/check integrity"
 -->
