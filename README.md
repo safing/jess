@@ -47,6 +47,19 @@ Jess does not have a PKI or some sort of web of trust. You have to exchange publ
 
 Jess is also capable of securing a network connection, but this currently only works with the library, not the CLI.
 
+### Building
+
+Jess uses [dep](https://github.com/golang/dep) as the dependency manager.  
+After cloning the repo, run `dep ensure`.
+
+The command line tool includes build information for debugging.  
+Please use the provided build script for building:
+```
+cd cmd
+./build -o jess
+./jess version
+```
+
 ### Architecture
 
 Before we dive into technical details, here are some more/updated terms:
