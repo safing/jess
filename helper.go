@@ -70,7 +70,7 @@ func (h *Helper) RandomBytes(n int) ([]byte, error) {
 	return RandomBytes(n)
 }
 
-// Burn gets rid of the given []byte slice(s).
+// Burn gets rid of the given []byte slice(s). This is currently ineffective, see known issues in the project's README.
 func (h *Helper) Burn(data ...[]byte) {
 	Burn(data...)
 }
@@ -99,7 +99,7 @@ func (h *Helper) MaxSecurityLevel() int {
 	return defaultSecurityLevel
 }
 
-// Burn gets rid of the given []byte slice(s).
+// Burn gets rid of the given []byte slice(s). This is currently ineffective, see known issues in the project's README.
 func Burn(data ...[]byte) {
 	for _, slice := range data {
 		for i := 0; i < len(slice); i++ {

@@ -110,6 +110,20 @@ Should any of these properties _not_ be required, the user has to intentionally 
 
 There is some more detail in [SPEC.md](./SPEC.md).
 
+### Known Issues
+
+#### Secure Key Deletion
+
+Go currently does not provide functionality to securely handle sensitive data, such as key material, in memory. Thus, it cannot be guaranteed that key material is correctly wiped from memory and won't leak when swapping memory to disk.
+
+There is an [issue in the Golang project](https://github.com/golang/go/issues/21865) about this.
+
+We evaluated two existing workarounds for this:
+1) Using `reflect` to dive into the internals of all algorithms to (possibly) delete key material. This is used in the Go implementation of Wireguard, for example. This still does not guarantee that Go internally deletes the key material.
+2) Use of the [Go memguard package](https://github.com/awnumar/memguard). While this would improve handling of key material that we directly manage, it will still not solve protecting all the intermediate values used in the implementations of the algorithms.
+
+We currently settled on waiting for further progress on the issue by the Go development team, and will reevaluate the progress regularly.
+
 ### Testing
 
 Basically, tests are run like this:

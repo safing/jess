@@ -418,7 +418,7 @@ func (w *WireSession) unwrapKeys(keyMaterial [][]byte) ([][]byte, error) {
 	return keyMaterial, nil
 }
 
-// burnEphemeralKeys burns all the ephemeral key material in the session.
+// burnEphemeralKeys burns all the ephemeral key material in the session. This is currently ineffective, see known issues in the project's README.
 func (w *WireSession) burnEphemeralKeys() error {
 	var lastErr error
 

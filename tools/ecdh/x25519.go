@@ -115,7 +115,7 @@ func (ec *X25519Curve) GenerateKey(signet tools.SignetInt) error {
 	return nil
 }
 
-// BurnKey implements the ToolLogic interface.
+// BurnKey implements the ToolLogic interface. This is currently ineffective, see known issues in the project's README.
 func (ec *X25519Curve) BurnKey(signet tools.SignetInt) error {
 	pubKey := signet.PublicKey()
 	privKey := signet.PrivateKey()

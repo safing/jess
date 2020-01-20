@@ -224,7 +224,7 @@ func (signet *Signet) Verify() error {
 	return errors.New("NIY")
 }
 
-// Burn destroys all the key material and renders the Signet unusable.
+// Burn destroys all the key material and renders the Signet unusable. This is currently ineffective, see known issues in the project's README.
 func (signet *Signet) Burn() error {
 	// load tool
 	err := signet.loadTool()
