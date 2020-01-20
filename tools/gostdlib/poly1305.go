@@ -25,7 +25,9 @@ func init() {
 // Poly1305 implements the cryptographic interface for Poly1305 message authentication codes.
 type Poly1305 struct {
 	tools.ToolLogicBase
-	key [32]byte
+	key        [32]byte
+	keyIsSetUp bool
+	keyUsed    bool
 }
 
 // Setup implements the ToolLogic interface.
@@ -35,6 +37,7 @@ func (poly *Poly1305) Setup() (err error) {
 	if err != nil {
 		return err
 	}
+	poly.keyIsSetUp = true
 
 	return nil
 }
@@ -43,14 +46,26 @@ func (poly *Poly1305) Setup() (err error) {
 func (poly *Poly1305) Reset() error {
 	// clean up key
 	poly.Helper().Burn(poly.key[:])
+	poly.keyUsed = false
+	poly.keyIsSetUp = false
 
 	return nil
 }
 
 // MAC implements the ToolLogic interface.
 func (poly *Poly1305) MAC(data, associatedData []byte) ([]byte, error) {
+	// check for key initialization
+	if !poly.keyIsSetUp {
+		return nil, errors.New("key not initialized")
+	}
+	// check for key reuse
+	if poly.keyUsed {
+		return nil, errors.New("key reuse detected")
+	}
+
 	// create MAC
 	mac := poly1305.New(&poly.key)
+	poly.keyUsed = true
 	// write data
 	n, err := mac.Write(data)
 	if err != nil {
