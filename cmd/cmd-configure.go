@@ -16,10 +16,11 @@ func init() {
 
 var (
 	configureCmd = &cobra.Command{
-		Use:     "configure",
-		Short:   "configure (and create) envelope",
-		Args:    cobra.MaximumNArgs(1),
-		PreRunE: requireTrustStore,
+		Use:                   "configure <envelope name>",
+		Short:                 "configure (and create) envelope",
+		DisableFlagsInUseLine: true,
+		Args:                  cobra.MaximumNArgs(1),
+		PreRunE:               requireTrustStore,
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			// check envelope name existence
 			if len(args) == 0 {

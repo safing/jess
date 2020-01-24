@@ -26,10 +26,10 @@ func newEnvelope(name string) (*jess.Envelope, error) {
 		Message: "Select preset:",
 		Options: []string{
 			"Encrypt with password",
-			"Encrypt with keyfile",
-			"Encrypt for someone",
+			"Encrypt with key",
+			"Encrypt for someone and sign",
+			"Encrypt for someone but don't sign",
 			"Sign a file",
-			"Custom from scratch",
 		},
 	}
 	err := survey.AskOne(prompt, &preset, nil)
@@ -39,26 +39,23 @@ func newEnvelope(name string) (*jess.Envelope, error) {
 
 	switch preset {
 	case "Encrypt with password":
-		envelope.Tools = jess.RecommendedStoragePassword
+		envelope.SuiteID = jess.SuitePassword
 		err = selectSignets(envelope, "pw")
-
-	case "Encrypt with keyfile":
-		envelope.Tools = jess.RecommendedStorageKey
+	case "Encrypt with key":
+		envelope.SuiteID = jess.SuiteKey
 		err = selectSignets(envelope, "key")
-
-	case "Encrypt for someone":
-		envelope.Tools = jess.RecommendedStorageKey
+	case "Encrypt for someone and sign":
+		envelope.SuiteID = jess.SuiteComplete
 		err = selectSignets(envelope, "recipient")
 		if err == nil {
 			err = selectSignets(envelope, "sender")
 		}
-
+	case "Encrypt for someone but don't sign":
+		envelope.SuiteID = jess.SuiteRcptOnly
+		err = selectSignets(envelope, "recipient")
 	case "Sign a file":
-		envelope.NoConfidentiality().NoIntegrity().NoRecipientAuth()
+		envelope.SuiteID = jess.SuiteSign
 		err = selectSignets(envelope, "sender")
-
-	case "Custom from scratch":
-		// do nothing
 	}
 	if err != nil {
 		return nil, err
@@ -72,12 +69,13 @@ func editEnvelope(envelope *jess.Envelope) error {
 		// main menu
 
 		// print envelope status
+		envelope.SecurityLevel = 0 // reset
 		session, err := envelope.Correspondence(trustStore)
 		if err != nil {
 			fmt.Printf("Envelope status: %s\n", err)
 		} else {
 			fmt.Println("Envelope status: valid.")
-			envelope.MinimumSecurityLevel = session.SecurityLevel
+			envelope.SecurityLevel = session.SecurityLevel
 		}
 
 		// sub menu
@@ -86,17 +84,18 @@ func editEnvelope(envelope *jess.Envelope) error {
 			Message: "Select to edit",
 			Options: formatColumns([][]string{
 				{"Done", "save and return"},
-				{" "},
-				{"Requirements", formatRequirements(envelope)},
-				{"Tools", strings.Join(envelope.Tools, ", ")},
+				{""},
+				{"Suite", envelope.SuiteID},
+				{"", "provides " + formatRequirements(envelope.Suite().Provides)},
+				{"", "and " + formatSecurityLevel(envelope.Suite().SecurityLevel)},
 				{"Secrets", formatSignetNames(envelope.Secrets)},
 				{"Recipients", formatSignetNames(envelope.Recipients)},
 				{"Senders", formatSignetNames(envelope.Senders)},
-				{" "},
+				{""},
 				{"Abort", "discard changes and return"},
 				{"Delete", "delete and return"},
 			}),
-			PageSize: 10,
+			PageSize: 15,
 		}
 		err = survey.AskOne(prompt, &submenu, nil)
 		if err != nil {
@@ -111,10 +110,8 @@ func editEnvelope(envelope *jess.Envelope) error {
 			return nil
 		case strings.HasPrefix(submenu, "Delete"):
 			return trustStore.DeleteEnvelope(envelope.Name)
-		case strings.HasPrefix(submenu, "Requirements"):
-			err = editEnvelopeRequirements(envelope)
-		case strings.HasPrefix(submenu, "Tools"):
-			err = editEnvelopeTools(envelope)
+		case strings.HasPrefix(submenu, "Suite"):
+			err = editEnvelopeSuite(envelope)
 		case strings.HasPrefix(submenu, "Secrets"):
 			err = selectSignets(envelope, "pw/key")
 		case strings.HasPrefix(submenu, "Recipients"):
@@ -128,69 +125,30 @@ func editEnvelope(envelope *jess.Envelope) error {
 	}
 }
 
-func editEnvelopeRequirements(envelope *jess.Envelope) error {
-	// TODO: improve
-
-	// get reqs
-	requirements := envelope.Requirements()
-	if requirements == nil {
-		return errors.New("envelope requirements uninitialized")
+func editEnvelopeSuite(envelope *jess.Envelope) error {
+	all := jess.Suites()
+	suiteOptions := make([][]string, 0, len(all))
+	for _, suite := range all {
+		suiteOptions = append(suiteOptions, []string{
+			suite.ID,
+			"provides " + suite.Provides.ShortString(),
+			formatSecurityLevel(suite.SecurityLevel),
+			"uses " + strings.Join(suite.Tools, ", "),
+			formatSuiteStatus(suite),
+		})
 	}
 
-	// build defaults
-	var defaults []string
-	if requirements.Has(jess.Confidentiality) {
-		defaults = append(defaults, "Confidentiality")
+	var selectedSuite string
+	prompt := &survey.Select{
+		Message:  "Select suite",
+		Options:  formatColumns(suiteOptions),
+		PageSize: 10,
 	}
-	if requirements.Has(jess.Integrity) {
-		defaults = append(defaults, "Integrity")
-	}
-	if requirements.Has(jess.RecipientAuthentication) {
-		defaults = append(defaults, "Recipient Authentication")
-	}
-	if requirements.Has(jess.SenderAuthentication) {
-		defaults = append(defaults, "Sender Authentication")
-	}
-
-	// prompt
-	var selected []string
-	prompt := &survey.MultiSelect{
-		Message: "Select requirements:",
-		Options: []string{
-			"Confidentiality",
-			"Integrity",
-			"Recipient Authentication",
-			"Sender Authentication",
-		},
-		Default: defaults,
-	}
-	err := survey.AskOne(prompt, &selected, nil)
+	err := survey.AskOne(prompt, &selectedSuite, nil)
 	if err != nil {
 		return err
 	}
 
-	// parse
-	requirements.Remove(jess.Confidentiality)
-	requirements.Remove(jess.Integrity)
-	requirements.Remove(jess.RecipientAuthentication)
-	requirements.Remove(jess.SenderAuthentication)
-	for _, req := range selected {
-		switch req {
-		case "Confidentiality":
-			requirements.Add(jess.Confidentiality)
-		case "Integrity":
-			requirements.Add(jess.Integrity)
-		case "Recipient Authentication":
-			requirements.Add(jess.RecipientAuthentication)
-		case "Sender Authentication":
-			requirements.Add(jess.SenderAuthentication)
-		}
-	}
-
-	return nil
-}
-
-func editEnvelopeTools(envelope *jess.Envelope) (err error) {
-	envelope.Tools, err = pickTools(envelope.Tools, "Select tools:")
-	return err
+	envelope.SuiteID = strings.Fields(selectedSuite)[0]
+	return envelope.ReloadSuite()
 }

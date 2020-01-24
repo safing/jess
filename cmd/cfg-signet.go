@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -32,19 +31,8 @@ func newSignet(name, scheme string) (*jess.Signet, error) {
 		schemeSelection := [][]string{
 			{jess.SignetSchemePassword, "Password"},
 			{jess.SignetSchemeKey, "Key", "dynamic b/s (set manually via --symkeysize)"},
-		}
-		for _, tool := range tools.AsList() {
-			// check if tool support Signets
-			switch tool.Info.Purpose {
-			case tools.PurposeKeyExchange,
-				tools.PurposeKeyEncapsulation,
-				tools.PurposeSigning:
-				schemeSelection = append(schemeSelection, []string{
-					tool.Info.Name,
-					tool.Info.FormatPurpose(),
-					formatToolSecurityLevel(tool),
-				})
-			}
+			{"ECDH-X25519", "Receiving (KeyExchange)"},
+			{"Ed25519", "Signing"},
 		}
 
 		// select scheme
@@ -202,42 +190,6 @@ func selectSignets(envelope *jess.Envelope, scope string) error {
 	selectedSignets, err := pickSignet(signetCandidates, promptMsg, "", true, currentSignets)
 	if err != nil {
 		return err
-	}
-
-	// add schemes to envelope
-checkSchemaLoop:
-	for _, signet := range selectedSignets {
-		switch signet.Scheme {
-		case jess.SignetSchemePassword, jess.SignetSchemeKey:
-		default:
-			for _, toolID := range envelope.Tools {
-				scheme := toolID
-				if strings.Contains(scheme, "(") {
-					scheme = strings.Split(scheme, "(")[0]
-				}
-				if scheme == signet.Scheme {
-					continue checkSchemaLoop
-				}
-			}
-
-			// schema not found in envelope toolset
-			tool, err := signet.Tool()
-			if err != nil {
-				return err
-			}
-			if tool.Info.HasOption(tools.OptionNeedsManagedHasher) ||
-				tool.Info.HasOption(tools.OptionNeedsDedicatedHasher) {
-				// add hash tool
-				hashToolName, err := pickHashTool(fmt.Sprintf("Select hash tool for %s:", tool.Info.Name), tool.Info.SecurityLevel)
-				if err != nil {
-					return err
-				}
-				envelope.Tools = append(envelope.Tools, fmt.Sprintf("%s(%s)", tool.Info.Name, hashToolName))
-			} else {
-				envelope.Tools = append(envelope.Tools, signet.Scheme)
-			}
-
-		}
 	}
 
 	// make stubs

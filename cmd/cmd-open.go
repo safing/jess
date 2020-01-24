@@ -17,7 +17,7 @@ import (
 
 func init() {
 	rootCmd.AddCommand(openCmd)
-	openCmd.Flags().StringVarP(&openFlagOutput, "output", "o", "", "specify output file")
+	openCmd.Flags().StringVarP(&openFlagOutput, "output", "o", "", "specify output file (`-` for stdout")
 }
 
 var (
@@ -25,8 +25,9 @@ var (
 	openCmdHelp    = "usage: jess open <file>"
 
 	openCmd = &cobra.Command{
-		Use:   "open",
-		Short: "decrypt a file",
+		Use:   "open <file>",
+		Short: "decrypt file",
+		Long:  "decrypt file with the given envelope. Use `-` to use stdin",
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			registerPasswordCallbacks()
 
@@ -39,7 +40,7 @@ var (
 			filename := args[0]
 			outputFilename := openFlagOutput
 			if outputFilename == "" {
-				if !strings.HasSuffix(filename, ".letter") || len(outputFilename) < 8 {
+				if !strings.HasSuffix(filename, ".letter") || len(filename) < 8 {
 					return errors.New("cannot automatically derive output filename, please specify with --output")
 				}
 				outputFilename = strings.TrimSuffix(filename, ".letter")

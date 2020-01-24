@@ -12,7 +12,7 @@ import (
 
 func init() {
 	rootCmd.AddCommand(closeCmd)
-	closeCmd.Flags().StringVarP(&closeFlagOutput, "output", "o", "", "specify output file")
+	closeCmd.Flags().StringVarP(&closeFlagOutput, "output", "o", "", "specify output file (`-` for stdout")
 }
 
 var (
@@ -20,9 +20,11 @@ var (
 	closeCmdHelp    = "usage: jess close <file> with <envelope name>"
 
 	closeCmd = &cobra.Command{
-		Use:     "close",
-		Short:   "encrypt file",
-		PreRunE: requireTrustStore,
+		Use:                   "close <file> with <envelope name>",
+		Short:                 "encrypt file",
+		Long:                  "encrypt file with the given envelope. Use `-` to use stdin",
+		DisableFlagsInUseLine: true,
+		PreRunE:               requireTrustStore,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			registerPasswordCallbacks()
 
