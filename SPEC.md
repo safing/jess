@@ -1,5 +1,7 @@
 # Jess Specification
 
+This document takes a closer look at the inner workings of Jess. It does not, however, define the formats and some other aspects. First, some basics will be covered. Then, the wire protocol is given a closer look.
+
 ## Basics
 
 The basic building blocks of jess are:

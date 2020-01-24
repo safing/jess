@@ -65,9 +65,6 @@ func WriteEnvelopeToFile(envelope *jess.Envelope, filename string) error {
 		return errInvalidEnvelopeNameChars
 	}
 
-	// serialize requirements
-	envelope.SerializeRequirements()
-
 	// serialize
 	data, err := dsd.DumpIndent(envelope, dsd.JSON, "\t")
 	if err != nil {
@@ -100,8 +97,8 @@ func LoadEnvelopeFromFile(filename string) (*jess.Envelope, error) {
 		return nil, err
 	}
 
-	// parse requirements from "No"
-	err = envelope.LoadRequirements()
+	// load suite using SuiteID
+	err = envelope.LoadSuite()
 	if err != nil {
 		return nil, err
 	}

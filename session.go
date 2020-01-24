@@ -57,15 +57,34 @@ func (sh *managedHasher) Sum() ([]byte, error) {
 }
 
 func newSession(e *Envelope) (*Session, error) { //nolint:gocognit,gocyclo
-	if len(e.Tools) == 0 {
-		return nil, errors.New("envelope is missing tools")
+	if e.suite == nil {
+		return nil, errors.New("suite not loaded")
 	}
 
+	// create session
 	s := &Session{
 		envelope:         e,
 		toolRequirements: newEmptyRequirements(),
 	}
 
+	// check envelope security level
+	if e.SecurityLevel > 0 {
+		err := s.checkSecurityLevel(e.SecurityLevel, func() string {
+			return fmt.Sprintf(`envelope "%s"`, e.Name)
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+	// check suite security level
+	err := s.checkSecurityLevel(e.suite.SecurityLevel, func() string {
+		return fmt.Sprintf(`suite "%s"`, e.suite.ID)
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// prepare variables
 	var (
 		keySourceAvailable    bool = false
 		totalSignetsSeen      int
@@ -74,13 +93,13 @@ func newSession(e *Envelope) (*Session, error) { //nolint:gocognit,gocyclo
 	)
 
 	// tool init loop: start
-	for i, toolID := range s.envelope.Tools {
+	for i, toolID := range s.envelope.suite.Tools {
 
 		///////////////////////////////////////
 		// tool init loop: check for duplicates
 		///////////////////////////////////////
 
-		for j, dupeToolID := range s.envelope.Tools {
+		for j, dupeToolID := range s.envelope.suite.Tools {
 			if i != j && toolID == dupeToolID {
 				return nil, fmt.Errorf("cannot use tool %s twice, each tool may be only specified once", toolID)
 			}
@@ -311,7 +330,10 @@ func newSession(e *Envelope) (*Session, error) { //nolint:gocognit,gocyclo
 	}
 
 	// key signets
-	err := e.LoopSecrets(SignetSchemeKey, func(signet *Signet) error {
+	err = e.LoopSecrets(SignetSchemeKey, func(signet *Signet) error {
+		s.toolRequirements.Add(SenderAuthentication)
+		s.toolRequirements.Add(RecipientAuthentication)
+
 		totalSignetsSeen++
 		keySourceAvailable = true
 		return s.calcAndCheckSecurityLevel(nil, signet)
@@ -350,7 +372,7 @@ func newSession(e *Envelope) (*Session, error) { //nolint:gocognit,gocyclo
 	if s.toolRequirements.Empty() {
 		return nil, errors.New("envelope excludes all security requirements, no meaningful operation possible")
 	}
-	err = s.toolRequirements.CheckComplianceTo(s.envelope.requirements)
+	err = s.toolRequirements.CheckComplianceTo(s.envelope.suite.Provides)
 	if err != nil {
 		return nil, err
 	}
@@ -368,7 +390,7 @@ func newSession(e *Envelope) (*Session, error) { //nolint:gocognit,gocyclo
 	}
 
 	// check if we are missing a kdf, but need one
-	if s.kdf == nil && len(s.signers) != len(s.envelope.Tools) {
+	if s.kdf == nil && len(s.signers) != len(s.envelope.suite.Tools) {
 		return nil, errors.New("missing a key derivation tool")
 	}
 
@@ -393,6 +415,15 @@ func newSession(e *Envelope) (*Session, error) { //nolint:gocognit,gocyclo
 		return nil, fmt.Errorf("detected signet or recipient in envelope that is not used by any tool")
 	}
 
+	// check session security level
+	// while this should never result in an error (because every part was already checked separately) this is used as a precaution to catch errors in future code changes
+	err = s.checkSecurityLevel(s.SecurityLevel, func() string {
+		return "current session"
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	return s, nil
 }
 
@@ -415,6 +446,9 @@ func (s *Session) calcAndCheckSecurityLevel(logic tools.ToolLogic, signet *Signe
 		// existence check is done when opening/closing
 		if len(signet.Key) > 0 {
 			switch logic.Info().Name {
+			case "SCRYPT-20":
+				// TODO: integrate this into the tool interface
+				calculatedSecurityLevel = CalculatePasswordSecurityLevel(string(signet.Key), 1<<20)
 			case "PBKDF2-SHA2-256":
 				// TODO: integrate this into the tool interface
 				calculatedSecurityLevel = CalculatePasswordSecurityLevel(string(signet.Key), 20000)
@@ -451,38 +485,18 @@ func (s *Session) calcAndCheckSecurityLevel(logic tools.ToolLogic, signet *Signe
 	}
 
 	if signet != nil {
-
 		// signet based security level checks
-		switch {
-		case minimumSecurityLevel > 0:
-			// check against minimumSecurityLevel
-			// minimumSecurityLevel overrides other checks
-			if calculatedSecurityLevel < minimumSecurityLevel {
-				return fmt.Errorf(`supplied %s signet "%s" with a security level of %d is weaker than the desired security level of %d`, signet.Scheme, signet.ID, calculatedSecurityLevel, minimumSecurityLevel)
-			}
-		case s.envelope.MinimumSecurityLevel > 0 && calculatedSecurityLevel < s.envelope.MinimumSecurityLevel:
-			// check against envelope's minimum security level
-			return fmt.Errorf(`supplied %s signet "%s" with a security level of %d is weaker than the envelope's minimum security level of %d`, signet.Scheme, signet.ID, calculatedSecurityLevel, s.envelope.MinimumSecurityLevel)
-		case s.SecurityLevel > 0 && calculatedSecurityLevel < s.SecurityLevel:
-			// check against toolset's security level
-			return fmt.Errorf(`supplied %s signet "%s" with a security level of %d is weaker than the toolset's security level of %d`, signet.Scheme, signet.ID, calculatedSecurityLevel, s.SecurityLevel)
-		}
-
+		err = s.checkSecurityLevel(calculatedSecurityLevel, func() string {
+			return fmt.Sprintf(`supplied %s signet "%s"`, signet.Scheme, signet.ID)
+		})
 	} else {
-
-		// tool based security level checks
-		switch {
-		case minimumSecurityLevel > 0:
-			// check against minimumSecurityLevel
-			// minimumSecurityLevel overrides other checks
-			if calculatedSecurityLevel < minimumSecurityLevel {
-				return fmt.Errorf(`tool %s with a security level of %d is weaker than the desired security level of %d`, logic.Info().Name, calculatedSecurityLevel, minimumSecurityLevel)
-			}
-		case s.envelope.MinimumSecurityLevel > 0 && calculatedSecurityLevel < s.envelope.MinimumSecurityLevel:
-			// check against envelope's minimum security level
-			return fmt.Errorf(`tool %s with a security level of %d is weaker than the envelope's minimum security level of %d`, logic.Info().Name, calculatedSecurityLevel, s.envelope.MinimumSecurityLevel)
-		}
-
+		// tool based securty level checks
+		err = s.checkSecurityLevel(calculatedSecurityLevel, func() string {
+			return "tool %s" + logic.Info().Name
+		})
+	}
+	if err != nil {
+		return err
 	}
 
 	// adapt security level of session
@@ -494,6 +508,42 @@ func (s *Session) calcAndCheckSecurityLevel(logic tools.ToolLogic, signet *Signe
 	// raise session max security level
 	if calculatedSecurityLevel > s.maxSecurityLevel {
 		s.maxSecurityLevel = calculatedSecurityLevel
+	}
+
+	return nil
+}
+
+func (s *Session) checkSecurityLevel(levelToCheck int, subject func() string) error {
+	switch {
+	case minimumSecurityLevel > 0:
+		// check against minimumSecurityLevel
+		// minimumSecurityLevel overrides other checks
+		if levelToCheck < minimumSecurityLevel {
+			return fmt.Errorf(
+				`%s with a security level of %d is weaker than the desired security level of %d`,
+				subject(),
+				levelToCheck,
+				minimumSecurityLevel,
+			)
+		}
+	case s.envelope.SecurityLevel > 0:
+		// check against envelope's minimum security level
+		if levelToCheck < s.envelope.SecurityLevel {
+			return fmt.Errorf(
+				`%s with a security level of %d is weaker than the envelope's minimum security level of %d`,
+				subject(),
+				levelToCheck,
+				s.envelope.SecurityLevel,
+			)
+		}
+	case levelToCheck < defaultSecurityLevel:
+		// check against default security level as fallback
+		return fmt.Errorf(
+			`%s with a security level of %d is weaker than the default minimum security level of %d`,
+			subject(),
+			levelToCheck,
+			defaultSecurityLevel,
+		)
 	}
 
 	return nil

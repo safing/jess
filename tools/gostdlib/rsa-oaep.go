@@ -35,6 +35,9 @@ func (oaep *RsaOAEP) EncapsulateKey(key []byte, signet tools.SignetInt) ([]byte,
 	if !ok {
 		return nil, tools.ErrInvalidKey
 	}
+	if rsaPubKey == nil {
+		return nil, tools.ErrInvalidKey
+	}
 
 	// check key length: The message must be no longer than the length of the public modulus minus twice the hash length, minus a further 2.
 	maxMsgSize := rsaPubKey.Size() - (2 * oaep.HashTool().DigestSize) - 2

@@ -81,7 +81,7 @@ func (requirements *Requirements) CheckComplianceTo(requirement *Requirements) e
 		}
 	}
 	if missing != nil {
-		return fmt.Errorf("missing tools with security requirements: %s", missing.String())
+		return fmt.Errorf("missing security requirements: %s", missing.String())
 	}
 	return nil
 }

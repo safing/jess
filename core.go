@@ -16,7 +16,7 @@ func (s *Session) Close(data []byte) (*Letter, error) { //nolint:gocognit
 
 	if s.wire == nil || s.wire.msgNo == 0 {
 		letter.Version = 1
-		letter.Tools = s.envelope.Tools
+		letter.SuiteID = s.envelope.SuiteID
 	}
 
 	/////////////////
@@ -314,6 +314,15 @@ func (s *Session) Open(letter *Letter) ([]byte, error) { //nolint:gocognit,gocyc
 
 // Verify verifies signatures of the given letter.
 func (s *Session) Verify(letter *Letter) error {
+
+	// debugging:
+	/*
+		fmt.Printf("opening: %+v\n", letter)
+		for _, sig := range letter.Signatures {
+			fmt.Printf("sig: %+v\n", sig)
+		}
+	*/
+
 	var err error
 	if s.wire == nil && letter.Version != 1 {
 		return fmt.Errorf("unsupported letter version: %d", letter.Version)
@@ -323,44 +332,54 @@ func (s *Session) Verify(letter *Letter) error {
 	// verify
 	/////////
 
-	if len(s.signers) == 0 {
-		return errors.New("letter is not signed")
-	}
+	// TODO: signature verification is run before tool setup. Currently, this is ok, but might change in the future. This might break additional signing algorithms that actually need setup.
 
 	data := letter.Data
-	associatedSigningData := letter.compileAssociatedSigningData(nil)
 
-	// run managed signing hashers
-	if s.managedSigningHashers != nil {
-		err = s.feedManagedHashers(s.managedSigningHashers, data, associatedSigningData)
-		if err != nil {
-			return err
-		}
-
-		defer s.resetManagedHashers(s.managedSigningHashers)
+	// build associated data
+	var associatedData []byte
+	if len(s.integratedCiphers) > 0 || len(s.macs) > 0 {
+		associatedData = letter.compileAssociatedData()
 	}
 
-	// run signers
-	if len(s.envelope.Senders) != len(letter.Signatures) {
-		return errors.New("mismatch regarding available signatures and senders")
-	}
-	sigIndex := 0
+	// Signature
+	if len(s.signers) > 0 {
+		associatedSigningData := letter.compileAssociatedSigningData(associatedData)
 
-	for _, tool := range s.signers {
-		//nolint:scopelint // function is executed immediately within loop
-		err = s.envelope.LoopSenders(tool.Info().Name, func(signet *Signet) error {
-
-			err := tool.Verify(data, associatedSigningData, letter.Signatures[sigIndex].Value, signet)
+		// run managed signing hashers
+		if s.managedSigningHashers != nil {
+			err = s.feedManagedHashers(s.managedSigningHashers, data, associatedSigningData)
 			if err != nil {
-				return fmt.Errorf("failed to verify signature (%s) with ID %s: %s", tool.Info().Name, letter.Signatures[sigIndex].ID, err)
+				return err
 			}
 
-			sigIndex++
-			return nil
-		})
-		if err != nil {
-			return err
+			defer s.resetManagedHashers(s.managedSigningHashers)
 		}
+
+		// run signers
+		if len(s.envelope.Senders) != len(letter.Signatures) {
+			return errors.New("mismatch regarding available signatures and senders")
+		}
+		sigIndex := 0
+
+		for _, tool := range s.signers {
+			//nolint:scopelint // function is executed immediately within loop
+			err = s.envelope.LoopSenders(tool.Info().Name, func(signet *Signet) error {
+
+				err := tool.Verify(data, associatedSigningData, letter.Signatures[sigIndex].Value, signet)
+				if err != nil {
+					return fmt.Errorf("failed to verify signature (%s) with ID %s: %s", tool.Info().Name, letter.Signatures[sigIndex].ID, err)
+				}
+
+				sigIndex++
+				return nil
+			})
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		return errors.New("no signatures to verify")
 	}
 
 	return nil

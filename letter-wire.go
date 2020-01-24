@@ -15,9 +15,7 @@ import (
 	- 2: Sending Keys
 	- 4: Apply Keys
 - Version: varint (if Setup Msg)
-- Tools: (if Setup Msg)
-	- Amount: varint
-	- Names: byte blocks
+- SuiteID: byte block (if Setup Msg)
 - Keys:
 	- Amount: varint
 	- IDs/Values: byte blocks
@@ -58,13 +56,8 @@ func (letter *Letter) ToWire() (*container.Container, error) {
 		// Version: varint (if Setup Msg)
 		c.AppendNumber(uint64(letter.Version))
 
-		// Tools: (if Setup Msg)
-		//   - Amount: varint
-		// 	 - Names: byte blocks
-		c.AppendInt(len(letter.Tools))
-		for _, toolName := range letter.Tools {
-			c.AppendAsBlock([]byte(toolName))
-		}
+		// SuiteID: byte block (if Setup Msg)
+		c.AppendAsBlock([]byte(letter.SuiteID))
 	}
 
 	if len(letter.Keys) > 0 {
@@ -136,21 +129,12 @@ func LetterFromWire(c *container.Container) (*Letter, error) {
 		}
 		letter.Version = n
 
-		// Tools: (if Setup Msg)
-		//   - Amount: varint
-		// 	 - Names: byte blocks
-		n, err = c.GetNextN8()
+		// SuiteID: byte block (if Setup Msg)
+		suiteID, err := c.GetNextBlock()
 		if err != nil {
 			return nil, err
 		}
-		letter.Tools = make([]string, n)
-		for i := 0; i < len(letter.Tools); i++ {
-			toolName, err := c.GetNextBlock()
-			if err != nil {
-				return nil, err
-			}
-			letter.Tools[i] = string(toolName)
-		}
+		letter.SuiteID = string(suiteID)
 	}
 
 	if sendingKeys {

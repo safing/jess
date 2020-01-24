@@ -11,7 +11,7 @@ import (
 func TestSerialization(t *testing.T) {
 	subject := &Letter{
 		Version: 1,
-		Tools:   RecommendedNetwork,
+		SuiteID: SuiteComplete,
 		Keys: []*Seal{
 			{ID: "a"},
 			{ID: "b"},
@@ -25,7 +25,7 @@ func TestSerialization(t *testing.T) {
 	testSerialize(t, subject, true)
 
 	subject.Version = 0
-	subject.Tools = nil
+	subject.SuiteID = ""
 	testSerialize(t, subject, true)
 
 	subject.ApplyKeys = false

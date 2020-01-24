@@ -120,16 +120,8 @@ func init() {
 }
 
 func TestCoreBasic(t *testing.T) {
-	// toolsets to test
-	toolsets := [][]string{
-		RecommendedStorageKey,
-		RecommendedStoragePassword,
-		{"HKDF(SHA2-256)", "CHACHA20-POLY1305"},
-		{"PBKDF2-SHA2-256", "HKDF(SHA2-256)", "CHACHA20-POLY1305"},
-	}
-
-	for _, toolIDs := range toolsets {
-		testStorage(t, toolIDs)
+	for _, suite := range Suites() {
+		testStorage(t, suite)
 	}
 }
 
@@ -137,10 +129,12 @@ func TestCoreBasic(t *testing.T) {
 func TestCoreAllCombinations(t *testing.T) {
 	// This shall test all tools in all combinations and every tool should be tested when placed before and after every other tool.
 
-	// skip in short tests
-	if testing.Short() {
+	// skip in short tests and when not running comprehensive
+	if testing.Short() || !runComprehensiveTestsActive {
 		return
 	}
+	// run this test with
+	// go test -timeout 10m github.com/safing/jess -v -count=1 -ldflags "-X github.com/safing/jess.RunComprehensiveTests=true" -run ^TestCoreAllCombinations$
 
 	// add all tools
 	var all []string
@@ -193,7 +187,7 @@ func TestCoreAllCombinations(t *testing.T) {
 
 			// rotate to test before/after differences
 			for i := 0; i < len(testTools); i++ {
-				detectedInvalid := testStorage(t, testTools)
+				detectedInvalid := testStorage(t, &Suite{Tools: testTools})
 				combinationsTested++
 				if detectedInvalid {
 					combinationsDetectedInvalid++
@@ -207,7 +201,7 @@ func TestCoreAllCombinations(t *testing.T) {
 			}
 		} else {
 			// test this order only
-			detectedInvalid := testStorage(t, testTools)
+			detectedInvalid := testStorage(t, &Suite{Tools: testTools})
 			combinationsTested++
 			if detectedInvalid {
 				combinationsDetectedInvalid++
@@ -226,12 +220,12 @@ func TestCoreAllCombinations(t *testing.T) {
 	t.Logf("of these, %d were successfully detected as invalid", combinationsDetectedInvalid)
 }
 
-func testStorage(t *testing.T, toolIDs []string) (detectedInvalid bool) {
-	// t.Logf("testing storage with %v", toolIDs)
+func testStorage(t *testing.T, suite *Suite) (detectedInvalid bool) {
+	// t.Logf("testing storage with %s", suite.ID)
 
-	e, err := setupEnvelopeAndTrustStore(t, toolIDs)
+	e, err := setupEnvelopeAndTrustStore(t, suite)
 	if err != nil {
-		tErrorf(t, "%v failed: %s", toolIDs, err)
+		tErrorf(t, "%s failed: %s", suite.ID, err)
 		return false
 	}
 	if e == nil {
@@ -242,122 +236,72 @@ func testStorage(t *testing.T, toolIDs []string) (detectedInvalid bool) {
 
 	s, err := e.Correspondence(testTrustStore)
 	if err != nil {
-		tErrorf(t, "%v failed to init session (1): %s", toolIDs, err)
+		tErrorf(t, "%s failed to init session (1): %s", suite.ID, err)
 		return false
 	}
 
 	letter, err := s.Close([]byte(testData1))
 	if err != nil {
-		tErrorf(t, "%v failed to close (1): %s", toolIDs, err)
+		tErrorf(t, "%s failed to close (1): %s", suite.ID, err)
 		return false
 	}
 
 	msg, err := letter.ToJSON()
 	if err != nil {
-		tErrorf(t, "%v failed to json encode (1): %s", toolIDs, err)
+		tErrorf(t, "%s failed to json encode (1): %s", suite.ID, err)
 		return false
 	}
 
-	// test 2: open from session
+	// test 2: open
 
 	letter2, err := LetterFromJSON(msg)
 	if err != nil {
-		tErrorf(t, "%v failed to json decode (2): %s", toolIDs, err)
+		tErrorf(t, "%s failed to json decode (2): %s", suite.ID, err)
 		return false
 	}
 
-	origData2, err := s.Open(letter2)
+	origData2, err := letter2.Open(e.suite.Provides, testTrustStore)
 	if err != nil {
-		tErrorf(t, "%v failed to open (2): %s", toolIDs, err)
+		tErrorf(t, "%s failed to open (2): %s", suite.ID, err)
 		return false
 	}
 	if string(origData2) != testData1 {
-		tErrorf(t, "%v original data mismatch (2): %s", toolIDs, string(origData2))
+		tErrorf(t, "%s original data mismatch (2): %s", suite.ID, string(origData2))
 		return false
 	}
 
-	if len(letter2.Signatures) > 0 {
-		err = s.Verify(letter2)
-		if err != nil {
-			tErrorf(t, "%v failed to verify (2): %s", toolIDs, err)
-			return false
-		}
-	}
-
-	// extended tests
-	// only run for toolsets greater than 3 if we comprehensive testing is on
-	// for these tests, it is enough if every tool is tested once
-	if len(toolIDs) > 3 && RunComprehensiveTests != "true" {
-		return false
-	}
-
-	// test 2.1: open again to check if reset after opening works
+	// test 2.1: verify
 
 	letter21, err := LetterFromJSON(msg)
 	if err != nil {
-		tErrorf(t, "%v failed to json decode (2.1): %s", toolIDs, err)
+		tErrorf(t, "%s failed to json decode (2): %s", suite.ID, err)
 		return false
 	}
 
-	origData21, err := s.Open(letter21)
-	if err != nil {
-		tErrorf(t, "%v failed to open (2.1): %s", toolIDs, err)
-		return false
-	}
-	if string(origData21) != testData1 {
-		tErrorf(t, "%v original data mismatch (2.1): %s", toolIDs, string(origData21))
-		return false
-	}
-
-	// test 2.2: close and open again to check if reset after closing works
-
-	letter22, err := s.Close([]byte(testData1))
-	if err != nil {
-		tErrorf(t, "%v failed to close (2.2): %s", toolIDs, err)
-		return false
-	}
-
-	origData22, err := s.Open(letter22)
-	if err != nil {
-		tErrorf(t, "%v failed to open (2.2): %s", toolIDs, err)
-		return false
-	}
-	if string(origData22) != testData1 {
-		tErrorf(t, "%v original data mismatch (2.2): %s", toolIDs, string(origData22))
-		return false
-	}
-
-	// test 3: open from letter
-
-	// FIXME - other improvements broke these tests, pausing them
-	/*
-		letter3, err := LetterFromJSON(msg)
+	if len(letter21.Signatures) > 0 {
+		err = letter21.Verify(e.suite.Provides, testTrustStore)
 		if err != nil {
-			tErrorf(t, "%v failed to json decode (3): %s", toolIDs, err)
+			tErrorf(t, "%s failed to verify (2): %s", suite.ID, err)
 			return false
 		}
-
-		origData3, err := letter3.Open(nil, testTrustStore)
-		if err != nil {
-			tErrorf(t, "%v failed to open (3): %s", toolIDs, err)
-			return false
-		}
-		if string(origData3) != testData1 {
-			tErrorf(t, "%v original data mismatch (3): %s", toolIDs, string(origData3))
-			return false
-		}
-	*/
+	}
 
 	return false
 }
 
 //nolint:gocognit,gocyclo
-func setupEnvelopeAndTrustStore(t *testing.T, toolIDs []string) (*Envelope, error) {
+func setupEnvelopeAndTrustStore(t *testing.T, suite *Suite) (*Envelope, error) {
+	// check if suite is registered
+	if suite.ID == "" {
+		// register as test suite
+		suite.ID = fmt.Sprintf("__unit_test_suite__" + strings.Join(suite.Tools, "__"))
+		registerSuite(suite)
+	}
 
 	// create envelope baseline
 	e := &Envelope{
-		Tools:        toolIDs,
-		requirements: newEmptyRequirements(),
+		SuiteID: suite.ID,
+		suite:   suite,
 	}
 
 	// check vars
@@ -366,7 +310,7 @@ func setupEnvelopeAndTrustStore(t *testing.T, toolIDs []string) (*Envelope, erro
 	asyncKeyEstablishmentPresent := false
 
 	// process tools and setup envelope
-	for _, toolID := range e.Tools {
+	for _, toolID := range e.suite.Tools {
 
 		// remove hasher argument for now
 		if strings.Contains(toolID, "(") {
@@ -389,7 +333,7 @@ func setupEnvelopeAndTrustStore(t *testing.T, toolIDs []string) (*Envelope, erro
 			e.Secrets = append(e.Secrets, pw)
 
 			// add a second one!
-			if len(toolIDs) <= 2 {
+			if len(suite.Tools) <= 2 {
 				pw1, err := getOrMakeSignet(t, nil, false, "test-pw-2")
 				if err != nil {
 					return nil, err
@@ -422,66 +366,69 @@ func setupEnvelopeAndTrustStore(t *testing.T, toolIDs []string) (*Envelope, erro
 			passDerPresent = true
 			// add passderivation requirements later, as it is a bit special
 		case tools.PurposeKeyExchange:
-			e.requirements.Add(RecipientAuthentication)
+			e.suite.Provides.Add(RecipientAuthentication)
 		case tools.PurposeKeyEncapsulation:
-			e.requirements.Add(RecipientAuthentication)
+			e.suite.Provides.Add(RecipientAuthentication)
 		case tools.PurposeSigning:
-			e.requirements.Add(SenderAuthentication)
+			e.suite.Provides.Add(SenderAuthentication)
 		case tools.PurposeIntegratedCipher:
-			e.requirements.Add(Confidentiality)
-			e.requirements.Add(Integrity)
+			e.suite.Provides.Add(Confidentiality)
+			e.suite.Provides.Add(Integrity)
 		case tools.PurposeCipher:
-			e.requirements.Add(Confidentiality)
+			e.suite.Provides.Add(Confidentiality)
 		case tools.PurposeMAC:
-			e.requirements.Add(Integrity)
+			e.suite.Provides.Add(Integrity)
 		}
 	}
 
 	// if invalid: test if toolset is recognized as invalid
 
 	// no requirements -> only "meta" tools (kdf, pass derivation)
-	if e.requirements.Empty() {
+	if e.suite.Provides.Empty() {
 		return nil, testInvalidToolset(e, "there are only meta tools in toolset")
 	}
 
 	// recipient auth, but no confidentiality? nope.
-	if e.requirements.Has(RecipientAuthentication) &&
-		!e.requirements.Has(Confidentiality) {
+	if e.suite.Provides.Has(RecipientAuthentication) &&
+		!e.suite.Provides.Has(Confidentiality) {
 		return nil, testInvalidToolset(e, "authenticating the recipient without using confidentiality does not make sense")
 	}
 
 	// check if we are missing key derivation - this is only ok if we are merely signing
 	if !keyDerPresent &&
-		(len(e.requirements.all) != 1 ||
-			!e.requirements.Has(SenderAuthentication)) {
+		(len(e.suite.Provides.all) != 1 ||
+			!e.suite.Provides.Has(SenderAuthentication)) {
 		return nil, testInvalidToolset(e, "omitting a key derivation tool is only allowed when merely signing")
 	}
 
 	// check if we have key derivation, but not need it
 	if keyDerPresent &&
-		(!e.requirements.Has(Confidentiality) &&
-			!e.requirements.Has(Integrity)) {
+		(!e.suite.Provides.Has(Confidentiality) &&
+			!e.suite.Provides.Has(Integrity)) {
 		return nil, testInvalidToolset(e, "a key derivation tool was specified, albeit none is needed")
 	}
 
 	// add passderivation here, as to easier handle the other cases
 	if passDerPresent {
-		e.requirements.Add(SenderAuthentication)
-		e.requirements.Add(RecipientAuthentication)
+		e.suite.Provides.Add(SenderAuthentication)
+		e.suite.Provides.Add(RecipientAuthentication)
 
 		// need Confidentiality for this to make sense
-		if !e.requirements.Has(Confidentiality) {
+		if !e.suite.Provides.Has(Confidentiality) {
 			return nil, testInvalidToolset(e, "using a password without confidentiality does not make sense")
 		}
 	}
 
-	if e.requirements.Has(Confidentiality) &&
-		!e.requirements.Has(Integrity) {
+	if e.suite.Provides.Has(Confidentiality) &&
+		!e.suite.Provides.Has(Integrity) {
 		return nil, testInvalidToolset(e, "having confidentiality without integrity does not make sense")
 	}
 
 	// add static key if needed
 	if !asyncKeyEstablishmentPresent && !passDerPresent && keyDerPresent {
+		e.suite.Provides.Add(SenderAuthentication)
+		e.suite.Provides.Add(RecipientAuthentication)
+
 		key, err := getOrMakeSignet(t, nil, false, "test-key-1")
 		if err != nil {
 			return nil, err
@@ -489,7 +436,7 @@ func setupEnvelopeAndTrustStore(t *testing.T, toolIDs []string) (*Envelope, erro
 		e.Secrets = append(e.Secrets, key)
 
 		// add a second one!
-		if len(toolIDs) <= 2 {
+		if len(suite.Tools) <= 2 {
 			key2, err := getOrMakeSignet(t, nil, false, "test-key-2")
 			if err != nil {
 				return nil, err

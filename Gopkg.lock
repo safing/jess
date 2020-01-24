@@ -104,7 +104,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:23e3d5f66ff9fd60dd264fbf26e71cab6b4a3bd2ef993a1645432d5c4c3b50fc"
+  digest = "1:4df631634d7dc4496e9c51436cc2d3ccd0d0d4734640f63108950fe68b348b7e"
   name = "golang.org/x/crypto"
   packages = [
     "blake2b",
@@ -118,6 +118,7 @@
     "poly1305",
     "salsa20",
     "salsa20/salsa",
+    "scrypt",
     "sha3",
   ]
   pruneopts = "UT"
@@ -164,6 +165,7 @@
     "golang.org/x/crypto/pbkdf2",
     "golang.org/x/crypto/poly1305",
     "golang.org/x/crypto/salsa20",
+    "golang.org/x/crypto/scrypt",
     "golang.org/x/crypto/sha3",
   ]
   solver-name = "gps-cdcl"

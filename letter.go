@@ -17,8 +17,8 @@ import (
 
 // Letter is the data format for encrypted data at rest or in transit.
 type Letter struct { //nolint:maligned // TODO
-	Version uint8    // signed, MAC'd (may not exist when wired)
-	Tools   []string // signed, MAC'd (may not exist when wired)
+	Version uint8  // signed, MAC'd (may not exist when wired)
+	SuiteID string // signed, MAC'd (may not exist when wired)
 
 	Nonce []byte  // signed, MAC'd
 	Keys  []*Seal `json:",omitempty"` // signed, MAC'd
@@ -45,18 +45,34 @@ type Seal struct {
 }
 
 // Envelope returns an envelope built from the letter, configured for opening it.
-func (letter *Letter) Envelope() (*Envelope, error) {
+func (letter *Letter) Envelope(requirements *Requirements) (*Envelope, error) {
+	// basic checks
 	if letter.Version == 0 {
 		return nil, fmt.Errorf("letter does not specify version")
 	}
-	if len(letter.Tools) == 0 {
-		return nil, fmt.Errorf("letter does not specify any tools")
+	if len(letter.SuiteID) == 0 {
+		return nil, fmt.Errorf("letter does not specify a suite")
 	}
 
+	// create envelope
 	e := &Envelope{
-		Version:      letter.Version,
-		Tools:        letter.Tools,
-		requirements: newEmptyRequirements(),
+		Version: letter.Version,
+		SuiteID: letter.SuiteID,
+	}
+
+	// get and check suite
+	err := e.LoadSuite()
+	if err != nil {
+		return nil, err
+	}
+	// default to full requirements
+	if requirements == nil {
+		requirements = NewRequirements()
+	}
+	// check suite against requirements
+	err = e.suite.Provides.CheckComplianceTo(requirements)
+	if err != nil {
+		return nil, err
 	}
 
 	for _, seal := range letter.Keys {
@@ -91,12 +107,9 @@ func (letter *Letter) Envelope() (*Envelope, error) {
 
 // Open creates a session and opens the letter in one step.
 func (letter *Letter) Open(requirements *Requirements, trustStore TrustStore) ([]byte, error) {
-	e, err := letter.Envelope()
+	e, err := letter.Envelope(requirements)
 	if err != nil {
 		return nil, err
-	}
-	if requirements != nil {
-		e.requirements = requirements
 	}
 
 	s, err := e.Correspondence(trustStore)
@@ -109,12 +122,9 @@ func (letter *Letter) Open(requirements *Requirements, trustStore TrustStore) ([
 
 // Verify creates a session and verifies the letter in one step.
 func (letter *Letter) Verify(requirements *Requirements, trustStore TrustStore) error {
-	e, err := letter.Envelope()
+	e, err := letter.Envelope(requirements)
 	if err != nil {
 		return err
-	}
-	if requirements != nil {
-		e.requirements = requirements
 	}
 
 	s, err := e.initCorrespondence(trustStore, true)
@@ -127,7 +137,7 @@ func (letter *Letter) Verify(requirements *Requirements, trustStore TrustStore) 
 
 // WireCorrespondence creates a wire session (communication over a network connection) from a letter.
 func (letter *Letter) WireCorrespondence(trustStore TrustStore) (*Session, error) {
-	e, err := letter.Envelope()
+	e, err := letter.Envelope(NewRequirements().Remove(SenderAuthentication))
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +189,7 @@ const (
 	// These IDs MUST NOT CHANGE
 
 	fieldIDLetterVersion uint64 = 1 // signed, MAC'd (may not exist when wired)
-	fieldIDLetterTools   uint64 = 2 // signed, MAC'd (may not exist when wired)
+	fieldIDLetterSuiteID uint64 = 2 // signed, MAC'd (may not exist when wired)
 	fieldIDLetterNonce   uint64 = 3 // signed, MAC'd
 	fieldIDLetterKeys    uint64 = 4 // signed, MAC'd
 	fieldIDLetterMac     uint64 = 5 // signed
@@ -199,12 +209,9 @@ func (letter *Letter) compileAssociatedData() []byte {
 		c.AppendNumber(fieldIDLetterVersion) // append field ID
 		c.AppendNumber(uint64(letter.Version))
 	}
-	if len(letter.Tools) > 0 {
-		c.AppendNumber(fieldIDLetterTools) // append field ID
-		c.AppendInt(len(letter.Tools))     // append number of tools
-		for _, toolID := range letter.Tools {
-			c.AppendAsBlock([]byte(toolID)) // append field content with length
-		}
+	if len(letter.SuiteID) > 0 {
+		c.AppendNumber(fieldIDLetterSuiteID)    // append field ID
+		c.AppendAsBlock([]byte(letter.SuiteID)) // append field content with length
 	}
 	if len(letter.Nonce) > 0 {
 		c.AppendNumber(fieldIDLetterNonce) // append field ID
