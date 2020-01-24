@@ -314,8 +314,7 @@ func newSession(e *Envelope) (*Session, error) { //nolint:gocognit,gocyclo
 	err := e.LoopSecrets(SignetSchemeKey, func(signet *Signet) error {
 		totalSignetsSeen++
 		keySourceAvailable = true
-		// FIXME
-		return nil
+		return s.calcAndCheckSecurityLevel(nil, signet)
 	})
 	if err != nil {
 		return nil, err
