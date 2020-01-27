@@ -1,4 +1,5 @@
 cpu.out
 vendor
-cmd/cmd
-cmd/jess
+cmd/cmd*
+cmd/jess*
+dist

@@ -16,7 +16,7 @@ branches:
     - /^fix\/travis\/.+$/ # fix/travis/*
 
 git:
-  autocrlf: false
+  autocrlf: false # gofmt doesn't like CRLF
 
 install:
   - go get -d -u github.com/golang/dep
@@ -25,3 +25,24 @@ install:
   - ./test install
 
 script: ./test --scripted
+
+before_deploy:
+  - git config --local user.name "travis"
+  - git config --local user.email ""
+  - ./pack build
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "Qj3iEGWiAH7uTfOcY6Hi1qF573R5eKjoiJRKgbkt8W7JNOeW+QJD/Vv78q3tpY3UkG1Ez4sOWRsXHrCF6V462NFoY/VFsb5V1i8WP9+v0Z0uNtYFWfWcp0HBN7jT9xsbCwnF4KnaWx+7hOpxeY+L6bBDnsIXMnK/rOWI+HdM2IFdXSEqvpoBERGyNKuPJMdssvX2tbitvRmj13RVZWQoBvxUr2DB8WAavG4afuqwkzoIHw11HpRf2v8BZ8eB1rO6FxaaC2yb8GsFwKsKLUVuqS5carZQVewHSAifh4Zq3f6fZDYRR5gBm8pLeMghWIt6rwo8L1/Fn3uZUkhKFLUR3zrEkxoHdf4jZjJ1oC4zcSDHJKA20QVCTfZGM1OaXmS7UzftRz/855tGvF746M1gSNzMPNmK2thgEgxW3UlOxbSSMvd5NDpTyPYn+DAW3lPDRNNH9a0t+C1mfb3SI4uHl+QaQ9BKSLpIwOJRVEAbrl7Vt7gs5pLJmj3bcwiZ3jjfEwuTNg6n+5QypUdWDY3sQ0EQVOHOHuSRR2TcnSd8wvVPKY7LZ+Fq8Dm0/lTKnz9pyy1psdUZpTEZ97IO3y7gFg3GSKGOoKkx94V5QtTSM9h3TFGFAF275n0MO5LTKyWZtT/1x9/G1k80fNAOHE9cooJAw580uI305pr3r3hjmN0="
+  file_glob: true
+  file: dist/*
+  skip_cleanup: true
+  overwrite: true
+  on:
+    tags: true
+
+# encrypting the Github Peronal Access Token:
+# docker run --rm -ti ruby /bin/bash
+# gem install travis
+# travis encrypt -r safing/jess <TOKEN>
