@@ -148,7 +148,7 @@ func (ed *Ed25519) GenerateKey(signet tools.SignetInt) error {
 	return nil
 }
 
-// BurnKey implements the ToolLogic interface.
+// BurnKey implements the ToolLogic interface. This is currently ineffective, see known issues in the project's README.
 func (ed *Ed25519) BurnKey(signet tools.SignetInt) error {
 	pubKey := signet.PublicKey()
 	privKey := signet.PrivateKey()

@@ -21,8 +21,9 @@ var (
 	verifyCmdHelp = "usage: jess verify <file>"
 
 	verifyCmd = &cobra.Command{
-		Use:   "verify",
-		Short: "verify a file",
+		Use:                   "verify <file>",
+		Short:                 "verify file",
+		DisableFlagsInUseLine: true,
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			// check args
 			if len(args) != 1 {

@@ -9,7 +9,8 @@ import (
 type Envelope struct { //nolint:maligned // TODO
 	Version uint8
 	Name    string
-	Tools   []string
+	SuiteID string
+	suite   *Suite
 
 	// Secret keys and passwords
 	Secrets []*Signet
@@ -26,11 +27,10 @@ type Envelope struct { //nolint:maligned // TODO
 
 	// For users, envelopes describe how a letter is closed.
 	// Therefore Secrets and Senders always refer to private keys and Recipients to public keys in that context.
-	// These distictions are important in order for the user to easily and confidently distinguish what is going to happen. Think of it as "human security".
+	// These distinctions are important in order for the user to easily and confidently distinguish what is going to happen. Think of it as "human security".
 
-	MinimumSecurityLevel int
-	No                   string
-	requirements         *Requirements
+	// SecurityLevel is the security level of the envelope when it was created
+	SecurityLevel int
 
 	// flag to signify if envelope is used for opening
 	opening bool
@@ -39,10 +39,8 @@ type Envelope struct { //nolint:maligned // TODO
 // NewUnconfiguredEnvelope returns an unconfigured, but slightly initialized envelope.
 func NewUnconfiguredEnvelope() *Envelope {
 	e := &Envelope{
-		Version:      1,
-		requirements: NewRequirements(),
+		Version: 1,
 	}
-	e.SerializeRequirements()
 	return e
 }
 
@@ -52,14 +50,17 @@ func (e *Envelope) Correspondence(trustStore TrustStore) (*Session, error) {
 }
 
 func (e *Envelope) initCorrespondence(trustStore TrustStore, verifying bool) (*Session, error) {
-	err := e.LoadRequirements()
+	err := e.LoadSuite()
 	if err != nil {
 		return nil, err
 	}
 
+	//nolint:gocritic // TODO: see below
 	if verifying {
-		// prep sender signets only
-		err = e.prepSignets(e.Senders, e.opening, trustStore)
+		// TODO: prep sender signets only
+		// TODO: for this to work, newSession needs to only check verification related things
+		// err = e.prepSignets(e.Senders, e.opening, trustStore)
+		err = e.PrepareSignets(trustStore)
 	} else {
 		// prep all signets
 		err = e.PrepareSignets(trustStore)
@@ -92,82 +93,27 @@ func (e *Envelope) Check(trustStore TrustStore) error {
 	return err
 }
 
-// NoRecipientAuth removes the requirement to authenticate the recipient.
-func (e *Envelope) NoRecipientAuth() *Envelope {
-	if e.requirements == nil {
-		e.requirements = NewRequirements()
-	}
-
-	e.requirements.Remove(RecipientAuthentication)
-	return e
+// Suite returns the loaded suite.
+func (e *Envelope) Suite() *Suite {
+	return e.suite
 }
 
-// NoSenderAuth removes the requirement to authenticate the sender.
-func (e *Envelope) NoSenderAuth() *Envelope {
-	if e.requirements == nil {
-		e.requirements = NewRequirements()
-	}
-
-	e.requirements.Remove(SenderAuthentication)
-	e.SerializeRequirements()
-	return e
-}
-
-// NoConfidentiality removes the requirement to provide confidentiality.
-func (e *Envelope) NoConfidentiality() *Envelope {
-	if e.requirements == nil {
-		e.requirements = NewRequirements()
-	}
-
-	e.requirements.Remove(Confidentiality)
-	e.SerializeRequirements()
-	return e
-}
-
-// NoIntegrity removes the requirement to provide integrity.
-func (e *Envelope) NoIntegrity() *Envelope {
-	if e.requirements == nil {
-		e.requirements = NewRequirements()
-	}
-
-	e.requirements.Remove(Integrity)
-	e.SerializeRequirements()
-	return e
-}
-
-// Unsafe removes all requirements.
-func (e *Envelope) Unsafe() *Envelope {
-	e.requirements = &Requirements{}
-	e.SerializeRequirements()
-	return e
-}
-
-// Requirements returns the required requirements.
-func (e *Envelope) Requirements() *Requirements {
-	return e.requirements
-}
-
-// SetRequirements sets new requirements.
-func (e *Envelope) SetRequirements(requirements *Requirements) {
-	e.requirements = requirements
-}
-
-// LoadRequirements loads the required requirements from the struct's exposed negated "No" specification.
-func (e *Envelope) LoadRequirements() error {
-	if e.requirements == nil {
-		attrs, err := ParseRequirementsFromNoSpec(e.No)
-		if err != nil {
-			return nil
+// LoadSuite loads the suite specified in the envelope.
+func (e *Envelope) LoadSuite() error {
+	if e.suite == nil {
+		suite, ok := GetSuite(e.SuiteID)
+		if !ok {
+			return fmt.Errorf("suite %s does not exist", e.SuiteID)
 		}
-
-		e.requirements = attrs
+		e.suite = suite
 	}
 	return nil
 }
 
-// SerializeRequirements saves the requirement requirements in the struct's exposed negated "No" specification.
-func (e *Envelope) SerializeRequirements() {
-	e.No = e.requirements.SerializeToNoSpec()
+// ReloadSuite forces reloading the suite specified in the envelope.
+func (e *Envelope) ReloadSuite() error {
+	e.suite = nil
+	return e.LoadSuite()
 }
 
 // LoopSecrets loops over all secrets of the given scheme.
@@ -233,11 +179,15 @@ func (e *Envelope) prepSignets(signets []*Signet, recipients bool, storage Trust
 		// load from storage
 		if len(signet.Key) == 0 {
 			if signet.Scheme == SignetSchemePassword {
-				err := fillPassword(signet, !recipients, storage, e.MinimumSecurityLevel)
+				err := fillPassword(signet, !recipients, storage, e.suite.SecurityLevel)
 				if err != nil {
 					return fmt.Errorf(`failed to get password for "%s": %s`, signet.ID, err)
 				}
 				continue
+			}
+			// keys are _always_ signets
+			if signet.Scheme == SignetSchemeKey {
+				recipients = false
 			}
 
 			// signet is referrer

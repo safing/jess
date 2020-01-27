@@ -11,7 +11,7 @@ import (
 	"github.com/AlecAivazis/survey"
 )
 
-func pickTools(toolNames []string, promptMsg string) ([]string, error) {
+func pickTools(toolNames []string, promptMsg string) ([]string, error) { //nolint:unused,deadcode // TODO
 	var toolSelection [][]string //nolint:prealloc
 	preSelectedTools := make([]string, 0, len(toolNames))
 	var preSelected int
@@ -101,7 +101,7 @@ func pickTools(toolNames []string, promptMsg string) ([]string, error) {
 	return newTools, nil
 }
 
-func pickHashTool(prompt string, minSecurityLevel int) (string, error) {
+func pickHashTool(prompt string, minSecurityLevel int) (string, error) { //nolint:unused // TODO
 	var hashToolSelection [][]string
 	for _, hashTool := range hashtools.AsList() {
 		if hashTool.SecurityLevel >= minSecurityLevel {
@@ -126,7 +126,7 @@ func pickHashTool(prompt string, minSecurityLevel int) (string, error) {
 	return strings.Fields(selectedEnty)[0], nil
 }
 
-func stringInSlice(s string, a []string) bool {
+func stringInSlice(s string, a []string) bool { //nolint:unused // TODO
 	for _, entry := range a {
 		if entry == s {
 			return true

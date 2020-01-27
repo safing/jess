@@ -19,10 +19,11 @@ func init() {
 }
 
 var manageCmd = &cobra.Command{
-	Use:     "manage",
-	Short:   "manage a trust store",
-	Args:    cobra.MaximumNArgs(1),
-	PreRunE: requireTrustStore,
+	Use:                   "manage",
+	Short:                 "manage a trust store",
+	DisableFlagsInUseLine: true,
+	Args:                  cobra.MaximumNArgs(1),
+	PreRunE:               requireTrustStore,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// select action
 		var selectedAction string
@@ -117,7 +118,11 @@ func manageEnvelopes() error {
 		for _, envelope := range all {
 			selection = append(selection, []string{
 				envelope.Name,
-				envelope.Requirements().ShortString(),
+				envelope.SuiteID,
+				fmt.Sprintf("provides %s and %s",
+					envelope.Suite().Provides.ShortString(),
+					formatSecurityLevel(envelope.Suite().SecurityLevel),
+				),
 				formatEnvelopeSignets(envelope),
 			})
 		}

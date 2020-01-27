@@ -1,9 +1,12 @@
-/*
-CLI:
+### Jess CLI
 
+This is currently still more of a planning and working document.  
+Here is the CLI interface that is planned:
+
+```
 jess create <envelope file>
 
-jess close <file> with <envelope file>
+jess close <file> with <envelope name>
 	encrypt a file, write to file with the same name, but with a .letter suffix
 	-o <file> ... write output to <file>
 
@@ -23,11 +26,12 @@ jess show <file>
 	- letter
 	- seal (signature-only letter)
 
-global arguments
---tsdir /path/to/truststore
---seclevel <uint>
---symkeysize <uint>
---quiet only output errors and warnings
+jess generate
+    generate a new signet and store both signet and recipient in the truststore
 
-*/
-package main
+global arguments
+    --tsdir /path/to/truststore
+    --seclevel <uint>
+    --symkeysize <uint>
+    --quiet only output errors and warnings
+```

@@ -119,6 +119,7 @@ type ToolLogic interface {
 	// BurnKey deletes the loaded keys in the Signet.
 	// Must work with a static (no Setup()) ToolLogic.
 	// Must be overridden by tools that declare FeatureKeyExchange, FeatureKeyEncapsulation or FeatureSigning.
+	// Implementations of this are currently ineffective, see known issues in the project's README.
 	BurnKey(signet SignetInt) error
 
 	// SecurityLevel returns the security level (approximate attack complexity as 2^n) of the given tool.
@@ -289,7 +290,7 @@ func (tlb *ToolLogicBase) GenerateKey(signet SignetInt) error {
 	return ErrNotImplemented
 }
 
-// BurnKey implements the ToolLogic interface.
+// BurnKey implements the ToolLogic interface. This is currently ineffective, see known issues in the project's README.
 func (tlb *ToolLogicBase) BurnKey(signet SignetInt) error {
 	return ErrNotImplemented
 }

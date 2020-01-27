@@ -22,7 +22,7 @@ type HelperInt interface {
 	// RandomBytes returns the specified amount of random bytes in a []byte slice.
 	RandomBytes(n int) ([]byte, error)
 
-	// Burn gets rid of the given []byte slice(s).
+	// Burn gets rid of the given []byte slice(s). This is currently ineffective, see known issues in the project's README.
 	Burn(data ...[]byte)
 
 	// DefaultSymmetricKeySize returns the default key size for this session.

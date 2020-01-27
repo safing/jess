@@ -38,6 +38,10 @@ func formatColumns(table [][]string) []string {
 	return lines
 }
 
+func formatSecurityLevel(securityLevel int) string {
+	return fmt.Sprintf("%d b/s", securityLevel)
+}
+
 func formatToolSecurityLevel(tool *tools.Tool) string {
 	if tool.Info.HasOption(tools.OptionNeedsSecurityLevel) {
 		return "dynamic b/s (set manually via --seclevel)"
@@ -45,7 +49,7 @@ func formatToolSecurityLevel(tool *tools.Tool) string {
 	if tool.Info.SecurityLevel == 0 {
 		return ""
 	}
-	return fmt.Sprintf("%d b/s", tool.Info.SecurityLevel)
+	return formatSecurityLevel(tool.Info.SecurityLevel)
 }
 
 func formatSignetName(signet *jess.Signet) string {
@@ -116,12 +120,11 @@ func formatSignetSecurityLevel(signet *jess.Signet) string {
 	return fmt.Sprintf("%d b/s", securityLevel)
 }
 
-func formatRequirements(envelope *jess.Envelope) string {
-	attrs := envelope.Requirements()
-	if attrs == nil || attrs.Empty() {
+func formatRequirements(reqs *jess.Requirements) string {
+	if reqs == nil || reqs.Empty() {
 		return "none (unsafe)"
 	}
-	return attrs.String()
+	return reqs.String()
 }
 
 func formatSignetNames(signets []*jess.Signet) string {
@@ -144,4 +147,15 @@ func formatEnvelopeSignets(envelope *jess.Envelope) string {
 		sections = append(sections, fmt.Sprintf("From: %s", formatSignetNames(envelope.Senders)))
 	}
 	return strings.Join(sections, ", ")
+}
+
+func formatSuiteStatus(suite *jess.Suite) string {
+	switch suite.Status {
+	case jess.SuiteStatusDeprecated:
+		return "DEPRECATED"
+	case jess.SuiteStatusRecommended:
+		return "recommended"
+	default:
+		return ""
+	}
 }

@@ -220,11 +220,11 @@ func (signet *Signet) StoreKey() error {
 
 // Verify verifies the signature of the signet.
 func (signet *Signet) Verify() error {
-	// FIXME
-	return errors.New("NIY")
+	// TODO
+	return errors.New("signet verification not yet implemented")
 }
 
-// Burn destroys all the key material and renders the Signet unusable.
+// Burn destroys all the key material and renders the Signet unusable. This is currently ineffective, see known issues in the project's README.
 func (signet *Signet) Burn() error {
 	// load tool
 	err := signet.loadTool()

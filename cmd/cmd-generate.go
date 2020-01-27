@@ -15,10 +15,11 @@ var (
 	generateFlagScheme string
 
 	generateCmd = &cobra.Command{
-		Use:     "generate",
-		Short:   "generate a new signet",
-		Args:    cobra.NoArgs,
-		PreRunE: requireTrustStore,
+		Use:                   "generate",
+		Short:                 "generate a new signet",
+		DisableFlagsInUseLine: true,
+		Args:                  cobra.NoArgs,
+		PreRunE:               requireTrustStore,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			_, err := newSignet(generateFlagName, generateFlagScheme)
 			return err

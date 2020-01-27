@@ -3,10 +3,10 @@ package jess
 var (
 	// must be var in order decrease for testing for better speed
 
-	defaultSecurityLevel = 256
+	defaultSecurityLevel = 128
 	minimumSecurityLevel = 0
 
-	defaultSymmetricKeySize = 32
+	defaultSymmetricKeySize = 16
 	minimumSymmetricKeySize = 0
 )
 

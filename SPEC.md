@@ -1,5 +1,7 @@
 # Jess Specification
 
+This document takes a closer look at the inner workings of Jess. It does not, however, define the formats and some other aspects. First, some basics will be covered. Then, the wire protocol is given a closer look.
+
 ## Basics
 
 The basic building blocks of jess are:
@@ -146,3 +148,18 @@ c->c: "gets secret [s2] from [e1, c2], applies it to [client<—server] and [cli
 c->s: "sends APPLY flag"
 s->s: "applies secret [s2] to [client—>server]"
 -->
+
+### Limitation of the 0-RTT Wire Protocol Security
+
+The wire protocol is able to send data in the first message. Until the first roundtrip has been completed (client to server to client), there are weakened security guarantees:
+
+1) If the static key (semi-static 24h TTL key in case of SPN) is compromised, there are _lesser_ to _no_ security guarantees:
+- A passive attacker, in possession of the private static key, is able to read all outgoing messages until the first roundtrip is completed.
+- An active attacker is able to execute a Man-in-the-Middle attack and completely obliterate all security guarantees.
+
+2) Incoming messages (server to client) have a reduced guarantee of security until the first roundtrip is completed:  
+An active attacker is able to execute a Man-in-the-Middle attack, completely _replacing_ the first outgoing (client to server) message. The attacker can choose the contents of that message to his liking. The response from the server will then be readable by the attacker, but the client will discard the message as authentication of it will fail.  
+As the Wire Protocol does not do any form of client/sender authentication, this is a problem for protocols that use underlying information, such as the IP address, for authentication. The sub-protocol must always authenticate clients to their needs and do not expect any guarantees from the Wire Protocol in that regard.  
+Also, note that this is also the case with the protocols in the Noise framework that start with an "N".
+
+This wire protocol was specifically built for SPN and the implementation there is fully aware of all the limitations of the protocol.

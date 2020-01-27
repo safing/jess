@@ -11,20 +11,19 @@ import (
 func TestWire(t *testing.T) {
 	wireReKeyAfterMsgs = 100
 
-	testWireCorrespondence(t, RecommendedNetwork, testData1)
-	testWireCorrespondence(t, RecommendedNetwork, testData2)
+	// current suites recommendation
+	testWireCorrespondence(t, getSuite(t, SuiteWire), testData1)
+	testWireCorrespondence(t, getSuite(t, SuiteWire), testData2)
 
-	testWireCorrespondence(t, []string{"ECDH-P224", "HKDF(SHA2-256)", "CHACHA20-POLY1305"}, testData1)
-	testWireCorrespondence(t, []string{"ECDH-P256", "HKDF(SHA2-256)", "CHACHA20-POLY1305"}, testData1)
-	testWireCorrespondence(t, []string{"ECDH-P384", "HKDF(SHA2-256)", "CHACHA20-POLY1305"}, testData1)
-	testWireCorrespondence(t, []string{"ECDH-P521", "HKDF(SHA2-256)", "CHACHA20-POLY1305"}, testData1)
-	testWireCorrespondence(t, []string{"RSA-OAEP(SHA2-256)", "HKDF(SHA2-256)", "CHACHA20-POLY1305"}, testData1)
+	// older suites
+	// testWireCorrespondence(t, getSuite(t, SuiteWireV1), testData1)
+	// testWireCorrespondence(t, getSuite(t, SuiteWireV1), testData2)
 }
 
-func testWireCorrespondence(t *testing.T, toolIDs []string, testData string) {
+func testWireCorrespondence(t *testing.T, suite *Suite, testData string) {
 	wtr := &wireTestRange{t: t}
-	wtr.init(toolIDs, testData)
-	fmt.Printf("\n\nsimulating %v\n", toolIDs)
+	wtr.init(suite, testData)
+	fmt.Printf("\n\nsimulating %v\n", suite.ID)
 	fmt.Println("two dots are one packet send+recv:")
 
 	fmt.Println("\nclient ->")
@@ -74,7 +73,7 @@ func testWireCorrespondence(t *testing.T, toolIDs []string, testData string) {
 	duration := wtr.endTime.Sub(wtr.startTime)
 	t.Logf(
 		"%v tested: msgsize=%d, rekey every %d msgs, %d msgs, %d bytes, +%f%% overhead, %s, %s per msg, %f Mbit/s",
-		wtr.toolIDs,
+		wtr.suite.ID,
 		len(testData),
 		wireReKeyAfterMsgs,
 		wtr.msgsTransferred,
@@ -92,7 +91,7 @@ func testWireCorrespondence(t *testing.T, toolIDs []string, testData string) {
 
 type wireTestRange struct {
 	t        *testing.T
-	toolIDs  []string
+	suite    *Suite
 	testData string
 
 	client *Session
@@ -108,12 +107,12 @@ type wireTestRange struct {
 	endTime          time.Time
 }
 
-func (wtr *wireTestRange) init(toolIDs []string, testData string) (detectedInvalid bool) {
-	wtr.toolIDs = toolIDs
+func (wtr *wireTestRange) init(suite *Suite, testData string) (detectedInvalid bool) {
+	wtr.suite = suite
 
-	e, err := setupEnvelopeAndTrustStore(wtr.t, wtr.toolIDs)
+	e, err := setupEnvelopeAndTrustStore(wtr.t, wtr.suite)
 	if err != nil {
-		wtr.t.Fatalf("%v failed to setup envelope: %s", wtr.toolIDs, err)
+		wtr.t.Fatalf("%s failed to setup envelope: %s", wtr.suite.ID, err)
 		return false
 	}
 	if e == nil {
@@ -122,7 +121,7 @@ func (wtr *wireTestRange) init(toolIDs []string, testData string) (detectedInval
 
 	wtr.client, err = e.WireCorrespondence(testTrustStore)
 	if err != nil {
-		wtr.t.Fatalf("%v failed to init client session: %s", wtr.toolIDs, err)
+		wtr.t.Fatalf("%s failed to init client session: %s", wtr.suite.ID, err)
 	}
 
 	// setup and reset
@@ -142,18 +141,18 @@ func (wtr *wireTestRange) init(toolIDs []string, testData string) (detectedInval
 func (wtr *wireTestRange) clientSend() {
 	letter, err := wtr.client.Close([]byte(wtr.testData))
 	if err != nil {
-		wtr.t.Fatalf("%v failed to close: %s", wtr.toolIDs, err)
+		wtr.t.Fatalf("%s failed to close: %s", wtr.suite.ID, err)
 	}
 
 	wireData, err := letter.ToWire()
 	if err != nil {
-		wtr.t.Fatalf("%v failed to serialize to wire: %s", wtr.toolIDs, err)
+		wtr.t.Fatalf("%s failed to serialize to wire: %s", wtr.suite.ID, err)
 	}
 
 	select {
 	case wtr.clientToServer <- wireData:
 	default:
-		wtr.t.Fatalf("%v could not send to server", wtr.toolIDs)
+		wtr.t.Fatalf("%s could not send to server", wtr.suite.ID)
 	}
 
 	fmt.Print(".")
@@ -167,27 +166,27 @@ func (wtr *wireTestRange) serverRecv() {
 
 		letter, err := LetterFromWire(wireData)
 		if err != nil {
-			wtr.t.Fatalf("%v failed to parse initial wired letter: %s", wtr.toolIDs, err)
+			wtr.t.Fatalf("%s failed to parse initial wired letter: %s", wtr.suite.ID, err)
 		}
 
 		if wtr.server == nil {
 			wtr.server, err = letter.WireCorrespondence(testTrustStore)
 			if err != nil {
-				wtr.t.Fatalf("%v failed to init server session: %s", wtr.toolIDs, err)
+				wtr.t.Fatalf("%s failed to init server session: %s", wtr.suite.ID, err)
 			}
 		}
 
 		origData, err := wtr.server.Open(letter)
 		if err != nil {
-			wtr.t.Fatalf("%v failed to open: %s", wtr.toolIDs, err)
+			wtr.t.Fatalf("%s failed to open: %s", wtr.suite.ID, err)
 		}
 		wtr.bytesTransferred += len(origData)
 
 		if string(origData) != wtr.testData {
-			wtr.t.Fatalf("%v testdata mismatch", wtr.toolIDs)
+			wtr.t.Fatalf("%s testdata mismatch", wtr.suite.ID)
 		}
 	default:
-		wtr.t.Fatalf("%v could not recv from client", wtr.toolIDs)
+		wtr.t.Fatalf("%s could not recv from client", wtr.suite.ID)
 	}
 
 	fmt.Print(".")
@@ -196,18 +195,18 @@ func (wtr *wireTestRange) serverRecv() {
 func (wtr *wireTestRange) serverSend() {
 	letter, err := wtr.server.Close([]byte(wtr.testData))
 	if err != nil {
-		wtr.t.Fatalf("%v failed to close: %s", wtr.toolIDs, err)
+		wtr.t.Fatalf("%s failed to close: %s", wtr.suite.ID, err)
 	}
 
 	wireData, err := letter.ToWire()
 	if err != nil {
-		wtr.t.Fatalf("%v failed to serialize to wire: %s", wtr.toolIDs, err)
+		wtr.t.Fatalf("%s failed to serialize to wire: %s", wtr.suite.ID, err)
 	}
 
 	select {
 	case wtr.serverToClient <- wireData:
 	default:
-		wtr.t.Fatalf("%v could not send to client", wtr.toolIDs)
+		wtr.t.Fatalf("%s could not send to client", wtr.suite.ID)
 	}
 
 	fmt.Print(".")
@@ -221,20 +220,20 @@ func (wtr *wireTestRange) clientRecv() {
 
 		letter, err := LetterFromWire(wireData)
 		if err != nil {
-			wtr.t.Fatalf("%v failed to parse initial wired letter: %s", wtr.toolIDs, err)
+			wtr.t.Fatalf("%s failed to parse initial wired letter: %s", wtr.suite.ID, err)
 		}
 
 		origData, err := wtr.client.Open(letter)
 		if err != nil {
-			wtr.t.Fatalf("%v failed to open: %s", wtr.toolIDs, err)
+			wtr.t.Fatalf("%s failed to open: %s", wtr.suite.ID, err)
 		}
 		wtr.bytesTransferred += len(origData)
 
 		if string(origData) != wtr.testData {
-			wtr.t.Fatalf("%v testdata mismatch", wtr.toolIDs)
+			wtr.t.Fatalf("%s testdata mismatch", wtr.suite.ID)
 		}
 	default:
-		wtr.t.Fatalf("%v could not recv from server", wtr.toolIDs)
+		wtr.t.Fatalf("%s could not recv from server", wtr.suite.ID)
 	}
 
 	fmt.Print(".")

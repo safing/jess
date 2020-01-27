@@ -2,6 +2,24 @@ package jess
 
 import "testing"
 
+func init() {
+	SetPasswordCallbacks(
+		func(signet *Signet, minSecurityLevel int) error {
+			return getTestPassword(signet)
+		},
+		getTestPassword,
+	)
+}
+
+func getTestPassword(signet *Signet) error {
+	pwSignet, err := testTrustStore.GetSignet(signet.ID, false)
+	if err != nil {
+		return err
+	}
+	signet.Key = pwSignet.Key
+	return nil
+}
+
 func TestCalculatePasswordSecurityLevel(t *testing.T) {
 	// basic weak
 	testPWSL(t, "asdf", -1)
@@ -13,62 +31,62 @@ func TestCalculatePasswordSecurityLevel(t *testing.T) {
 	testPWSL(t, "aaaaaaaaAAAAAAAA00000000********", -1)
 
 	// chars only
-	testPWSL(t, "AVWHBwmF", 58)
-	testPWSL(t, "AVWHBwmFGt", 70)
-	testPWSL(t, "AVWHBwmFGtLM", 81)
-	testPWSL(t, "AVWHBwmFGtLMGh", 93)
-	testPWSL(t, "AVWHBwmFGtLMGhYf", 104)
-	testPWSL(t, "AVWHBwmFGtLMGhYfPkcyawfmZXRTQdxs", 195)
+	testPWSL(t, "AVWHBwmF", 64)
+	testPWSL(t, "AVWHBwmFGt", 76)
+	testPWSL(t, "AVWHBwmFGtLM", 87)
+	testPWSL(t, "AVWHBwmFGtLMGh", 98)
+	testPWSL(t, "AVWHBwmFGtLMGhYf", 110)
+	testPWSL(t, "AVWHBwmFGtLMGhYfPkcyawfmZXRTQdxs", 201)
 
 	// with number
-	testPWSL(t, "AVWHBwm1", 60)
-	testPWSL(t, "AVWHBwmFG1", 72)
-	testPWSL(t, "AVWHBwmFGtL1", 84)
-	testPWSL(t, "AVWHBwmFGtLMG1", 96)
-	testPWSL(t, "AVWHBwmFGtLMGhY1", 108)
-	testPWSL(t, "AVWHBwmFGtLMGhYfPkcyawfmZXRTQdx1", 203)
+	testPWSL(t, "AVWHBwm1", 66)
+	testPWSL(t, "AVWHBwmFG1", 78)
+	testPWSL(t, "AVWHBwmFGtL1", 90)
+	testPWSL(t, "AVWHBwmFGtLMG1", 102)
+	testPWSL(t, "AVWHBwmFGtLMGhY1", 114)
+	testPWSL(t, "AVWHBwmFGtLMGhYfPkcyawfmZXRTQdx1", 209)
 
 	// with number and special
-	testPWSL(t, "AVWHBw1_", 61)
-	testPWSL(t, "AVWHBwmF1_", 73)
-	testPWSL(t, "AVWHBwmFGt1_", 86)
-	testPWSL(t, "AVWHBwmFGtLM1_", 98)
-	testPWSL(t, "AVWHBwmFGtLMGh1_", 110)
-	testPWSL(t, "AVWHBwmFGtLMGhYfPkcyawfmZXRTQd1_", 207)
+	testPWSL(t, "AVWHBw1_", 67)
+	testPWSL(t, "AVWHBwmF1_", 79)
+	testPWSL(t, "AVWHBwmFGt1_", 91)
+	testPWSL(t, "AVWHBwmFGtLM1_", 103)
+	testPWSL(t, "AVWHBwmFGtLMGh1_", 116)
+	testPWSL(t, "AVWHBwmFGtLMGhYfPkcyawfmZXRTQd1_", 213)
 
 	// with number and more special
-	testPWSL(t, "AVWHBw1*", 65)
-	testPWSL(t, "AVWHBwmF1*", 78)
-	testPWSL(t, "AVWHBwmFGt1*", 91)
-	testPWSL(t, "AVWHBwmFGtLM1*", 104)
-	testPWSL(t, "AVWHBwmFGtLMGh1*", 117)
-	testPWSL(t, "AVWHBwmFGtLMGhYfPkcyawfmZXRTQd1*", 221)
+	testPWSL(t, "AVWHBw1*", 70)
+	testPWSL(t, "AVWHBwmF1*", 83)
+	testPWSL(t, "AVWHBwmFGt1*", 96)
+	testPWSL(t, "AVWHBwmFGtLM1*", 109)
+	testPWSL(t, "AVWHBwmFGtLMGh1*", 122)
+	testPWSL(t, "AVWHBwmFGtLMGhYfPkcyawfmZXRTQd1*", 226)
 
 	// created, strong
 
 	// "Schneier scheme"
 	// source: https://www.schneier.com/blog/archives/2014/03/choosing_secure_1.html
-	testPWSL(t, "WIw7,mstmsritt...", 116)
-	testPWSL(t, "Wow...doestcst", 94)
-	testPWSL(t, "Ltime@go-inag~faaa!", 135)
-	testPWSL(t, "uTVM,TPw55:utvm,tpwstillsecure", 210)
+	testPWSL(t, "WIw7,mstmsritt...", 122)
+	testPWSL(t, "Wow...doestcst", 100)
+	testPWSL(t, "Ltime@go-inag~faaa!", 140)
+	testPWSL(t, "uTVM,TPw55:utvm,tpwstillsecure", 216)
 
 	// generated, strong
-	testPWSL(t, "YebGPQuuoxQwyeJMvEWACTLexUUxVBFdHYqqUybBUNfBttCvWQxDdDCdYfgMPCQp", 378)
-	testPWSL(t, "dpPyXmXpbECn6LWuQDJaitTTJguGfRTqNUxWfoHnBKDHvRhjR2WiQ7iDcuRJNnEd", 394)
-	testPWSL(t, "WgEKCp8c8{bPrG{Zo(Ms97pKt3EsR9ycz4R=kMjPp^Uafqxsd2ZTFtkfvnoueKJz", 428)
-	testPWSL(t, "galena-fighter-festival", 127)
-	testPWSL(t, "impotent-drug-dropout-damage", 152)
-	testPWSL(t, "artless-newswire-rill-belgium-marplot", 196)
-	testPWSL(t, "forbade-momenta-spook-sure-devilish-wobbly", 221)
+	testPWSL(t, "YebGPQuuoxQwyeJMvEWACTLexUUxVBFdHYqqUybBUNfBttCvWQxDdDCdYfgMPCQp", 383)
+	testPWSL(t, "dpPyXmXpbECn6LWuQDJaitTTJguGfRTqNUxWfoHnBKDHvRhjR2WiQ7iDcuRJNnEd", 400)
+	testPWSL(t, "WgEKCp8c8{bPrG{Zo(Ms97pKt3EsR9ycz4R=kMjPp^Uafqxsd2ZTFtkfvnoueKJz", 434)
+	testPWSL(t, "galena-fighter-festival", 132)
+	testPWSL(t, "impotent-drug-dropout-damage", 157)
+	testPWSL(t, "artless-newswire-rill-belgium-marplot", 202)
+	testPWSL(t, "forbade-momenta-spook-sure-devilish-wobbly", 227)
 }
 
 func testPWSL(t *testing.T, password string, expectedSecurityLevel int) {
-	securityLevel := CalculatePasswordSecurityLevel(password, 20000)
+	securityLevel := CalculatePasswordSecurityLevel(password, 1<<20)
 
 	if securityLevel < expectedSecurityLevel {
-		t.Errorf("password %s (%di): %d - expected at least %d", password, 20000, securityLevel, expectedSecurityLevel)
+		t.Errorf("password %s (%di): %d - expected at least %d", password, 1<<20, securityLevel, expectedSecurityLevel)
 	} else {
-		t.Logf("password %s (%di): %d", password, 20000, securityLevel)
+		t.Logf("password %s (%di): %d", password, 1<<20, securityLevel)
 	}
 }
