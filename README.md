@@ -2,18 +2,23 @@
 
 Jess is a cryptographic library and cli tool that focuses on usability and freedom.
 
-DISCLAIMER: This is still work in progress. Breaking changes might still occur. Do _not_ use in production yet! Use at your own risk.
+__Project Status__:
+- Core Logic: production & [audited](docs/AUDITS.md)
+- Go API: non-final production (breaking changes might happen)
+- CLI Tool: working alpha stage, rough around the edges
+
+DISCLAIMER: Do _not_ use in production yet! Use at your own risk.
 
 ### Usage & Intro
 
 Jess uses the theme of envelopes and letters in order to make everything a bit more comprehensible. Here is a list of terms that will prove helpful:
-- __Signet__ private or secret key
-- __Recipient__ public key
-- __Envelope__ encryption configuration
-- __Letter__ encrypted data with associated configuration
-- __Trust Store__ a storage of everything you trust, your own keys and configurations, and your friends' public keys.
+- __Signet__ ... private or secret key
+- __Recipient__ ... public key
+- __Envelope__ ... encryption configuration
+- __Letter__ ... encrypted data with associated configuration
+- __Trust Store__ ... a storage of everything you trust, your own keys and configurations, and your friends' public keys.
 
-Jess makes heavy use of `trust stores`, which in its basic form is just a directory, where you can store your keys and configuration. You can either set a default through an environment variable, or set it manually every time. This makes it easy to compartmentalize your trust zones.
+Jess makes heavy use of `trust stores`, which in its basic form is just a directory, where you can store your keys and configuration. You can either set a default one through an environment variable, or set it manually every time. This makes it easy to compartmentalize your trust zones.
 
 Here is how you can setup a trust store and generate some keys:
 
@@ -46,8 +51,8 @@ Normally, of course, you would have a friend send you their `recipient` file (pu
 In order to help you not screw up any configuration, Jess has the concept of __requirements__:
 - Confidentiality ... hide contents
 - Integrity ... check that nothing was modified
-- Recipient Authentication ... verify identity of recipient
-- Sender Authentication ... verify identity of sender
+- Recipient Authentication ... verify recipient
+- Sender Authentication ... verify sender
 
 By default, all of them are required. If you, for some reason, do not require one ore more of them, you will have to disable them in the envelope for closing an envelope (encrypting) and pass the reduced requirements when opening a letter (decrypting).
 
