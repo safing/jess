@@ -6,6 +6,7 @@ go:
 os:
   - linux
   - windows
+  - osx
 
 branches:
   only:
@@ -13,6 +14,9 @@ branches:
     - develop
     - /^feature\/travis\/.+$/ # feature/travis/*
     - /^fix\/travis\/.+$/ # fix/travis/*
+
+git:
+  autocrlf: false
 
 install:
   - go get -d -u github.com/golang/dep
