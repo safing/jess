@@ -79,6 +79,10 @@ function build_all {
 }
 
 function build_os {
+  # build only for current OS
+  # set for script
+  GOOS=$(go env GOOS)
+  # architectures
   GOARCH=amd64 build
 }
 
