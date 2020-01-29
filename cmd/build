@@ -1,5 +1,8 @@
 #!/bin/bash
 
+baseDir="$( cd "$(dirname "$0")" && pwd )"
+cd "$baseDir"
+
 # get build data
 if [[ "$BUILD_COMMIT" == "" ]]; then
   BUILD_COMMIT=$(git describe --all --long --abbrev=99 --dirty 2>/dev/null)
@@ -8,7 +11,7 @@ if [[ "$BUILD_USER" == "" ]]; then
   BUILD_USER=$(id -un)
 fi
 if [[ "$BUILD_HOST" == "" ]]; then
-  BUILD_HOST=$(hostname -f)
+  BUILD_HOST=$(hostname)
 fi
 if [[ "$BUILD_DATE" == "" ]]; then
   BUILD_DATE=$(date +%d.%m.%Y)
@@ -45,7 +48,7 @@ fi
 
 echo "Please notice, that this build script includes metadata into the build."
 echo "This information is useful for debugging and license compliance."
-echo "Run the compiled binary with the -version flag to see the information included."
+echo "Run the compiled binary with the version command to see the information included."
 
 # build
 BUILD_PATH="github.com/safing/jess/vendor/github.com/safing/portbase/info"
