@@ -25,12 +25,9 @@ install:
   - dep ensure
   - ./test install
 
-script: ./test --scripted
-
-before_deploy:
-  - git config --local user.name "travis"
-  - git config --local user.email ""
-  - ./pack build
+script:
+  - ./test --scripted
+  - ./pack build-os
 
 deploy:
   provider: releases

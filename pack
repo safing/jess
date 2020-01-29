@@ -78,12 +78,19 @@ function build_all {
   GOOS=darwin GOARCH=amd64 build
 }
 
+function build_os {
+  GOARCH=amd64 build
+}
+
 case $1 in
   "check" )
     check_all
     ;;
   "build" )
     build_all
+    ;;
+  "build-os" )
+    build_os
     ;;
   * )
     echo ""

@@ -11,7 +11,7 @@ if [[ "$BUILD_USER" == "" ]]; then
   BUILD_USER=$(id -un)
 fi
 if [[ "$BUILD_HOST" == "" ]]; then
-  BUILD_HOST=$(hostname -f)
+  BUILD_HOST=$(hostname)
 fi
 if [[ "$BUILD_DATE" == "" ]]; then
   BUILD_DATE=$(date +%d.%m.%Y)
