@@ -12,7 +12,7 @@ import (
 
 	"github.com/safing/jess"
 
-	"github.com/AlecAivazis/survey"
+	"github.com/AlecAivazis/survey/v2"
 )
 
 func registerPasswordCallbacks() {
@@ -57,7 +57,7 @@ func createPassword(reference string, minSecurityLevel int) (string, error) {
 	prompt := &survey.Password{
 		Message: makePrompt("Please enter password", reference),
 	}
-	err := survey.AskOne(prompt, &pw1, func(val interface{}) error {
+	err := survey.AskOne(prompt, &pw1, survey.WithValidator(func(val interface{}) error {
 		pwVal, ok := val.(string)
 		if !ok {
 			return errors.New("input error")
@@ -68,7 +68,7 @@ func createPassword(reference string, minSecurityLevel int) (string, error) {
 			return fmt.Errorf("please enter a stronger password, you only reached %d bits of security, while the envelope has a minimum of %d", pwSecLevel, minSecurityLevel)
 		}
 		return nil
-	})
+	}))
 	if err != nil {
 		return "", err
 	}
