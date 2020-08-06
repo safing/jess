@@ -86,6 +86,12 @@ func (letter *Letter) ToWire() (*container.Container, error) {
 	return c, nil
 }
 
+// LetterFromWireData is a relay to LetterFromWire to quickly fix import issues of godep.
+// DEPRECATED
+func LetterFromWireData(data []byte) (*Letter, error) {
+	return LetterFromWire(container.New(data))
+}
+
 // LetterFromWire parses a letter sent over a network connection.
 func LetterFromWire(c *container.Container) (*Letter, error) {
 	letter := &Letter{}
