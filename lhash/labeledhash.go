@@ -50,6 +50,10 @@ func Load(labeledHash []byte) (*LabeledHash, error) {
 		return nil, errors.New("compatibility error: invalid or unsupported algorithm")
 	}
 
+	if alg.new().Size() != len(digest) {
+		return nil, errors.New("integrity error: invalid digest length")
+	}
+
 	return &LabeledHash{
 		alg:    alg,
 		digest: digest,

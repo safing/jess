@@ -188,6 +188,7 @@ func (e *Envelope) prepSignets(signets []*Signet, recipients bool, storage Trust
 			// keys are _always_ signets
 			if signet.Scheme == SignetSchemeKey {
 				recipients = false
+				// TODO: spills to next loop
 			}
 
 			// signet is referrer

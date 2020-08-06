@@ -15,7 +15,7 @@ func (s *Session) Close(data []byte) (*Letter, error) { //nolint:gocognit
 	letter := &Letter{}
 
 	if s.wire == nil || s.wire.msgNo == 0 {
-		letter.Version = 1
+		letter.Version = s.envelope.Version
 		letter.SuiteID = s.envelope.SuiteID
 	}
 
