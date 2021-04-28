@@ -1,3 +1,5 @@
+> **Check out our main project at [safing/portmaster](https://github.com/safing/portmaster)**
+
 # Jess
 
 Jess is a cryptographic library and cli tool that focuses on usability and freedom.
