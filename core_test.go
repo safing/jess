@@ -299,10 +299,9 @@ func setupEnvelopeAndTrustStore(t *testing.T, suite *Suite) (*Envelope, error) {
 	}
 
 	// create envelope baseline
-	e := &Envelope{
-		SuiteID: suite.ID,
-		suite:   suite,
-	}
+	e := NewUnconfiguredEnvelope()
+	e.SuiteID = suite.ID
+	e.suite = suite
 
 	// check vars
 	keyDerPresent := false
