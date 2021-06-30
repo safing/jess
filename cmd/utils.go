@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/AlecAivazis/survey"
+	"github.com/AlecAivazis/survey/v2"
 )
 
 func confirm(promptMsg string, suggest bool) (bool, error) {

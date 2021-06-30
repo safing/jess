@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/AlecAivazis/survey"
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/safing/jess"
 	"github.com/safing/jess/tools"
 )
@@ -18,7 +18,7 @@ func newSignet(name, scheme string) (*jess.Signet, error) {
 		enterName := &survey.Input{
 			Message: "Enter name of signet:",
 		}
-		err := survey.AskOne(enterName, &name, survey.MinLength(1))
+		err := survey.AskOne(enterName, &name, survey.WithValidator(survey.MinLength(1)))
 		if err != nil {
 			return nil, err
 		}

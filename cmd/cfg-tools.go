@@ -8,7 +8,7 @@ import (
 
 	"github.com/safing/jess/tools"
 
-	"github.com/AlecAivazis/survey"
+	"github.com/AlecAivazis/survey/v2"
 )
 
 func pickTools(toolNames []string, promptMsg string) ([]string, error) { //nolint:unused,deadcode // TODO
