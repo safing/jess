@@ -7,8 +7,11 @@ import (
 )
 
 var (
-	testEmpty = []byte("")
-	testFox   = []byte("The quick brown fox jumps over the lazy dog.")
+	testEmpty   = []byte("")
+	testFox     = "The quick brown fox jumps over the lazy dog."
+	testFoxData = []byte(testFox)
+	noMatch     = "no match"
+	noMatchData = []byte(noMatch)
 )
 
 func testAlgorithm(t *testing.T, alg Algorithm, emptyHex, foxHex string) {
@@ -32,33 +35,77 @@ func testAlgorithm(t *testing.T, alg Algorithm, emptyHex, foxHex string) {
 	}
 
 	// test fox
-	lh = Digest(alg, testFox)
+	lh = Digest(alg, testFoxData)
 	if !bytes.Equal(lh.Bytes()[2:], foxBytes) {
 		t.Errorf("alg %d: test fox: digest mismatch, expected %+v, got %+v", alg, foxBytes, lh.Bytes()[2:])
 	}
 
-	// test matching
-	if !lh.Matches(testFox) {
+	// test matching with serialized/loaded labeled hash
+	if !lh.MatchesData(testFoxData) {
 		t.Errorf("alg %d: failed to match reference", alg)
 	}
-	if lh.Matches([]byte("nope")) {
+	if !lh.MatchesString(testFox) {
+		t.Errorf("alg %d: failed to match reference", alg)
+	}
+	if lh.MatchesData(noMatchData) {
+		t.Errorf("alg %d: failed to non-match garbage", alg)
+	}
+	if lh.MatchesString(noMatch) {
 		t.Errorf("alg %d: failed to non-match garbage", alg)
 	}
 
-	// serialize
-	lhs := Digest(alg, testFox).String()
-	// load
-	loaded, err := LoadFromString(lhs)
+	// Test representations
+
+	// Hex
+	lhs := Digest(alg, testFoxData)
+	loaded, err := FromHex(lhs.Hex())
 	if err != nil {
-		t.Errorf("alg %d: failed to load from string: %s", alg, err)
+		t.Errorf("alg %d: failed to load from hex string: %s", alg, err)
 		return
 	}
+	testFormat(t, alg, lhs, loaded)
 
-	// test matching with serialized/loaded labeled hash
-	if !loaded.Matches(testFox) {
+	// Base64
+	lhs = Digest(alg, testFoxData)
+	loaded, err = FromBase64(lhs.Base64())
+	if err != nil {
+		t.Errorf("alg %d: failed to load from base64 string: %s", alg, err)
+		return
+	}
+	testFormat(t, alg, lhs, loaded)
+
+	// Base58
+	lhs = Digest(alg, testFoxData)
+	loaded, err = FromBase58(lhs.Base58())
+	if err != nil {
+		t.Errorf("alg %d: failed to load from base58 string: %s", alg, err)
+		return
+	}
+	testFormat(t, alg, lhs, loaded)
+}
+
+func testFormat(t *testing.T, alg Algorithm, lhs, loaded *LabeledHash) {
+	noMatchLH := Digest(alg, noMatchData)
+
+	// Test equality.
+	if !lhs.Equal(loaded) {
+		t.Errorf("alg %d: equality test failed", alg)
+	}
+	if lhs.Equal(noMatchLH) {
+		t.Errorf("alg %d: non-equality test failed", alg)
+	}
+
+	// Test matching.
+	if !loaded.MatchesData(testFoxData) {
 		t.Errorf("alg %d: failed to match reference", alg)
 	}
-	if loaded.Matches([]byte("nope")) {
+	if !loaded.MatchesString(testFox) {
+		t.Errorf("alg %d: failed to match reference", alg)
+	}
+	if loaded.MatchesData(noMatchData) {
+		t.Errorf("alg %d: failed to non-match garbage", alg)
+	}
+	if loaded.MatchesString(noMatch) {
 		t.Errorf("alg %d: failed to non-match garbage", alg)
 	}
 }

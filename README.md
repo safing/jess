@@ -113,6 +113,22 @@ Some of these properties may also be used multiple times. For example, you could
 
 Should any of these properties _not_ be required, the user has to intentionally remove requirements.
 
+### Recommended Suites
+
+In order to reduce the possibility of making unsuggested combinations of tools, the primary interface to choose tools is to use a suite:
+
+The command `jess list` shows the available suites:
+
+```
+Name/ID   Provides   Security Level   Tools                                                                     Notes
+key_v1    CIRS       128 b/s          HKDF(BLAKE2b-256), CHACHA20-POLY1305                                      recommended
+pw_v1     CIRS       128 b/s          SCRYPT-20, HKDF(BLAKE2b-256), CHACHA20-POLY1305                           recommended
+rcpt_v1   CIR        128 b/s          ECDH-X25519, HKDF(BLAKE2b-256), CHACHA20-POLY1305                         recommended
+sign_v1   S          128 b/s          Ed25519(BLAKE2b-256)                                                      recommended
+v1        CIRS       128 b/s          ECDH-X25519, Ed25519(BLAKE2b-256), HKDF(BLAKE2b-256), CHACHA20-POLY1305   recommended
+w1        CIR        128 b/s          ECDH-X25519, HKDF(BLAKE2b-256), CHACHA20-POLY1305                         recommended
+```
+
 ### Specification
 
 There is some more detail in [SPEC.md](./SPEC.md).

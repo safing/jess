@@ -3,3 +3,6 @@ vendor
 cmd/cmd*
 cmd/jess*
 dist
+
+# Custom dev deops
+go.mod.*

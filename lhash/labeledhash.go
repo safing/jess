@@ -3,8 +3,11 @@ package lhash
 import (
 	"crypto/subtle"
 	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
+
+	"github.com/mr-tron/base58"
 
 	"github.com/safing/portbase/container"
 )
@@ -60,11 +63,33 @@ func Load(labeledHash []byte) (*LabeledHash, error) {
 	}, nil
 }
 
-// LoadFromString loads a labeled hash from the given string.
-func LoadFromString(labeledHash string) (*LabeledHash, error) {
-	raw, err := base64.RawURLEncoding.DecodeString(labeledHash)
+// FromHex loads a labeled hash from the given hexadecimal string.
+func FromHex(hexEncoded string) (*LabeledHash, error) {
+	raw, err := hex.DecodeString(hexEncoded)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode: %s", err)
+		return nil, fmt.Errorf("failed to decode hex: %s", err)
+	}
+
+	return Load(raw)
+}
+
+// FromBase64 loads a labeled hash from the given Base64 string using raw url
+// encoding.
+func FromBase64(base64Encoded string) (*LabeledHash, error) {
+	raw, err := base64.RawURLEncoding.DecodeString(base64Encoded)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode base64: %s", err)
+	}
+
+	return Load(raw)
+}
+
+// FromBase58 loads a labeled hash from the given Base58 string using the BTC
+// alphabet.
+func FromBase58(base58Encoded string) (*LabeledHash, error) {
+	raw, err := base58.Decode(base58Encoded)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode base58: %s", err)
 	}
 
 	return Load(raw)
@@ -78,13 +103,37 @@ func (lh *LabeledHash) Bytes() []byte {
 	return c.CompileData()
 }
 
-// String returns the string representation of the labeled hash (base64 raw url encoding).
-func (lh *LabeledHash) String() string {
+// Hex returns the hexadecimal string representation of the labeled hash.
+func (lh *LabeledHash) Hex() string {
+	return hex.EncodeToString(lh.Bytes())
+}
+
+// Base64 returns the Base64 string representation of the labeled hash using
+// raw url encoding.
+func (lh *LabeledHash) Base64() string {
 	return base64.RawURLEncoding.EncodeToString(lh.Bytes())
 }
 
-// Matches returns true if the digest of the given data matches the hash.
-func (lh *LabeledHash) Matches(data []byte) bool {
+// Base58 returns the Base58 string representation of the labeled hash using
+// the BTC alphabet.
+func (lh *LabeledHash) Base58() string {
+	return base58.Encode(lh.Bytes())
+}
+
+// Equal returns true if the given labeled hash is equal.
+// Equality is checked by comparing both the algorithm and the digest value.
+func (lh *LabeledHash) Equal(other *LabeledHash) bool {
+	return lh.alg == other.alg &&
+		subtle.ConstantTimeCompare(lh.digest, other.digest) == 1
+}
+
+// MatchesString returns true if the digest of the given string matches the hash.
+func (lh *LabeledHash) MatchesString(s string) bool {
+	return lh.MatchesData([]byte(s))
+}
+
+// MatchesData returns true if the digest of the given data matches the hash.
+func (lh *LabeledHash) MatchesData(data []byte) bool {
 	hasher := lh.alg.new()
 	_, _ = hasher.Write(data) // never returns an error
 	defer hasher.Reset()      // internal state may leak data if kept in memory
