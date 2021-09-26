@@ -19,6 +19,15 @@ func (s *Session) Close(data []byte) (*Letter, error) { //nolint:gocognit
 		letter.SuiteID = s.envelope.SuiteID
 	}
 
+	// Check for additional data in slice, which we should not touch.
+	// TODO: Pre-allocate needed overhead for AEAD and others.
+	if len(data) != cap(data) {
+		// Make a copy of the data in order to not modify unrelated data.
+		copiedData := make([]byte, len(data))
+		copy(copiedData, data)
+		data = copiedData
+	}
+
 	/////////////////
 	// key management
 	/////////////////
