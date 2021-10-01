@@ -10,7 +10,7 @@ var (
 	minimumSymmetricKeySize = 0
 )
 
-// Currently recommended toolsets
+// Currently recommended toolsets.
 var (
 	RecommendedNetwork         = []string{"ECDH-X25519", "HKDF(SHA2-256)", "CHACHA20-POLY1305"}
 	RecommendedStoragePassword = []string{"PBKDF2-SHA2-256", "HKDF(SHA2-256)", "CHACHA20-POLY1305"}

@@ -15,7 +15,6 @@ import (
 )
 
 func TestConformity(t *testing.T) {
-
 	// Test that every tool only provides one primary feature, as this enables to automatically assign a distinct role to every tool.
 
 	for _, tool := range tools.AsList() {
@@ -34,7 +33,6 @@ func TestConformity(t *testing.T) {
 		}
 
 	}
-
 }
 
 func TestPasswordHashingSpeed(t *testing.T) {
@@ -249,5 +247,4 @@ func TestSignetHandling(t *testing.T) {
 			}
 		}
 	}
-
 }

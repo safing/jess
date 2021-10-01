@@ -1,6 +1,6 @@
 package jess
 
-// Suite status options
+// Suite status options.
 const (
 	SuiteStatusDeprecated  uint8 = 0
 	SuiteStatusPermitted   uint8 = 1

@@ -10,7 +10,6 @@ func checkNoSpec(t *testing.T, a *Requirements, expectedNoSpec string) {
 }
 
 func TestRequirements(t *testing.T) {
-
 	a := NewRequirements()
 	checkNoSpec(t, a, "")
 

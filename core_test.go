@@ -111,10 +111,10 @@ func init() {
 	defaultSecurityLevel = 128
 
 	// init special test config
-	if RunComprehensiveTests == "true" { //nolint:goconst
+	if RunComprehensiveTests == "true" {
 		runComprehensiveTestsActive = true
 	}
-	if RunTestsInDebugStyle == "true" { //nolint:goconst
+	if RunTestsInDebugStyle == "true" {
 		runTestsInDebugStyleActive = true
 	}
 }
@@ -456,7 +456,6 @@ func testInvalidToolset(e *Envelope, whyInvalid string) error {
 }
 
 func getOrMakeSignet(t *testing.T, tool tools.ToolLogic, recipient bool, signetID string) (*Signet, error) {
-
 	// check if signet already exists
 	signet, err := testTrustStore.GetSignet(signetID, recipient)
 	if err == nil {
@@ -503,9 +502,9 @@ func getOrMakeSignet(t *testing.T, tool tools.ToolLogic, recipient bool, signetI
 }
 
 // generateCombinations returns all possible combinations of the given []string slice.
-// Forked from https://github.com/mxschmitt/golang-combinations/blob/a887187146560effd2677e987b069262f356297f/combinations.go
-// Copyright (c) 2018 Max Schmitt
-// MIT License
+//   Forked from https://github.com/mxschmitt/golang-combinations/blob/a887187146560effd2677e987b069262f356297f/combinations.go
+//   Copyright (c) 2018 Max Schmitt,
+//   MIT License.
 func generateCombinations(set []string) (subsets [][]string) {
 	length := uint(len(set))
 

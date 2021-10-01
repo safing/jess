@@ -40,14 +40,14 @@ type WireSession struct { //nolint:maligned // TODO
 	newKeyMaterial [][]byte
 }
 
-// kxPair is key exchange pair
+// kxPair is key exchange pair.
 type kxPair struct {
 	tool   tools.ToolLogic
 	signet *Signet
 	peer   *Signet
 }
 
-// kePair is key encapsulation "pair"
+// kePair is key encapsulation "pair".
 type kePair struct {
 	tool   tools.ToolLogic
 	signet *Signet

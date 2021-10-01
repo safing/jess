@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// Security requirements of a letter
+// Security requirements of a letter.
 const (
 	Confidentiality uint8 = iota
 	Integrity

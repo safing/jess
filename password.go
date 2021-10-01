@@ -38,7 +38,6 @@ func SetPasswordCallbacks(
 
 // CalculatePasswordSecurityLevel calculates the security level of the given password and iterations of the pbkdf algorithm.
 func CalculatePasswordSecurityLevel(password string, iterations int) int {
-
 	// TODO: this calculation is pretty conservative and errs on the safe side
 	// maybe soften this up a litte, but couldn't find any scientific foundation for that
 

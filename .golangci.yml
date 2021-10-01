@@ -7,6 +7,13 @@ linters:
     - funlen
     - whitespace
     - wsl
+    - gomnd
+    - goerr113 
+    - testpackage
+    - nestif
+    - gocognit
+    - noctx
+    - gocyclo
 
 linters-settings:
   godox:

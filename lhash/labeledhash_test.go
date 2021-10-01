@@ -15,7 +15,6 @@ var (
 )
 
 func testAlgorithm(t *testing.T, alg Algorithm, emptyHex, foxHex string) {
-
 	// setup
 	emptyBytes, err := hex.DecodeString(emptyHex)
 	if err != nil {

@@ -3,7 +3,6 @@ package hashtools
 import "testing"
 
 func TestAll(t *testing.T) {
-
 	testData := []byte("The quick brown fox jumps over the lazy dog. ")
 
 	all := AsList()

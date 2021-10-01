@@ -24,10 +24,8 @@ import (
 - MAC: byte block
 */
 
-var (
-	// ErrIncompatibleWireFormatVersion is returned when an incompatible wire format is encountered.
-	ErrIncompatibleWireFormatVersion = errors.New("incompatible wire format version")
-)
+// ErrIncompatibleWireFormatVersion is returned when an incompatible wire format is encountered.
+var ErrIncompatibleWireFormatVersion = errors.New("incompatible wire format version")
 
 // ToWire serializes to letter for sending it over a network connection.
 func (letter *Letter) ToWire() (*container.Container, error) {
@@ -87,7 +85,8 @@ func (letter *Letter) ToWire() (*container.Container, error) {
 }
 
 // LetterFromWireData is a relay to LetterFromWire to quickly fix import issues of godep.
-// DEPRECATED
+//
+// Deprecated: Please use LetterFromWire with a fresh container directly.
 func LetterFromWireData(data []byte) (*Letter, error) {
 	return LetterFromWire(container.New(data))
 }

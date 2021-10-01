@@ -30,7 +30,7 @@ type ToolInfo struct {
 	Author  string
 }
 
-// Tool Purpose
+// Tool Purposes.
 const (
 	// Key Management and Creation, as well as Authenticity
 
@@ -71,7 +71,7 @@ const (
 	PurposeMAC
 )
 
-// Tool Options
+// Tool Options.
 const (
 	// Operation
 

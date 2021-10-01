@@ -4,21 +4,21 @@ warnings=0
 errors=0
 scripted=0
 goUp="\\e[1A"
-all=0
 fullTestFlags="-short"
 install=0
+testonly=0
 
 function help {
   echo "usage: $0 [command] [options]"
   echo ""
   echo "commands:"
   echo "  <none>        run baseline tests"
-  echo "  all           run all tests"
-  echo "  install       install deps for running baseline tests"
-  echo "  install all   install deps for running all tests"
+  echo "  full          run full tests (ie. not short)"
+  echo "  install       install deps for running tests"
   echo ""
   echo "options:"
   echo "  --scripted    dont jump console lines (still use colors)"
+  echo "  --test-only   don run linters only tests"
   echo "  [package]     run tests only on this package"
 }
 
@@ -94,12 +94,15 @@ while true; do
     goUp=""
     shift 1
     ;;
+  "--test-only")
+    testonly=1
+    shift 1
+    ;;
   "install")
     install=1
     shift 1
     ;;
-  "all")
-    all=1
+  "full")
     fullTestFlags=""
     shift 1
     ;;
@@ -119,10 +122,9 @@ if [[ $install -eq 1 ]]; then
   echo "installing dependencies..."
   echo "$ go get -u golang.org/x/lint/golint"
   go get -u golang.org/x/lint/golint
-  if [[ $all -eq 1 ]]; then
-    echo "$ go get -u github.com/golangci/golangci-lint/cmd/golangci-lint"
-    go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
-  fi
+  # TODO: update golangci-lint version regularly
+  echo "$ curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.24.0"
+  curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.24.0
   exit 0
 fi
 
@@ -131,24 +133,24 @@ if [[ $(which go) == "" ]]; then
   echo "go command not found"
   exit 1
 fi
-if [[ $(which gofmt) == "" ]]; then
-  echo "gofmt command not found"
-  exit 1
-fi
-if [[ $(which golint) == "" ]]; then
-  echo "golint command not found"
-  echo "install with: go get -u golang.org/x/lint/golint"
-  echo "or run: ./test install"
-  exit 1
-fi
-if [[ $all -eq 1 ]]; then
+if [[ $testonly -eq 0 ]]; then
+  if [[ $(which gofmt) == "" ]]; then
+    echo "gofmt command not found"
+    exit 1
+  fi
+  if [[ $(which golint) == "" ]]; then
+    echo "golint command not found"
+    echo "install with: go get -u golang.org/x/lint/golint"
+    echo "or run: ./test install"
+    exit 1
+  fi
   if [[ $(which golangci-lint) == "" ]]; then
     echo "golangci-lint command not found"
-    echo "install locally with: go get -u github.com/golangci/golangci-lint/cmd/golangci-lint"
-    echo "or run: ./test install all"
-    echo ""
-    echo "hint: install for CI with: curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin vX.Y.Z"
+    echo "install with: curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin vX.Y.Z"
     echo "don't forget to specify the version you want"
+    echo "or run: ./test install"
+    echo ""
+    echo "alternatively, install the current dev version with: go get -u github.com/golangci/golangci-lint/cmd/golangci-lint"
     exit 1
   fi
 fi
@@ -156,15 +158,10 @@ fi
 # target selection
 if [[ "$1" == "" ]]; then
   # get all packages
-  packages=$(go list ./...)
+  packages=$(go list -e ./...)
 else
   # single package testing
-  packages=$(go list)/$1
-  if [[ ! -d "$GOPATH/src/$packages" ]]; then
-    echo "go package $packages does not exist"
-    help
-    exit 1
-  fi
+  packages=$(go list -e)/$1
   echo "note: only running tests for package $packages"
 fi
 
@@ -174,13 +171,15 @@ echo "running tests for ${platformInfo//$'\n'/ }:"
 
 # run vet/test on packages
 for package in $packages; do
+  packagename=${package#github.com/safing/jess} #TODO: could be queried with `go list .`
+  packagename=${packagename#/}
   echo ""
   echo $package
-  checkformat $package
-  run golint -set_exit_status -min_confidence 1.0 $package
-  run go vet $package
-  if [[ $all -eq 1 ]]; then
-    run golangci-lint run $GOPATH/src/$package
+  if [[ $testonly -eq 0 ]]; then
+    checkformat $package
+    run golint -set_exit_status -min_confidence 1.0 $package
+    run go vet $package
+    run golangci-lint run $packagename
   fi
   run go test -cover $fullTestFlags $package
 done

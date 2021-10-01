@@ -150,7 +150,7 @@ func (letter *Letter) ToJSON() ([]byte, error) {
 	return json.Marshal(letter)
 }
 
-// LetterFromJSON loads a json-serialized letter
+// LetterFromJSON loads a json-serialized letter.
 func LetterFromJSON(data []byte) (*Letter, error) {
 	letter := &Letter{}
 

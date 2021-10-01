@@ -11,13 +11,11 @@ import (
 	"github.com/aead/ecdh"
 )
 
-var (
-	nistCurveInfo = &tools.ToolInfo{
-		Purpose: tools.PurposeKeyExchange,
-		Comment: "FIPS 186",
-		Author:  "NIST, 2009",
-	}
-)
+var nistCurveInfo = &tools.ToolInfo{
+	Purpose: tools.PurposeKeyExchange,
+	Comment: "FIPS 186",
+	Author:  "NIST, 2009",
+}
 
 func init() {
 	tools.Register(&tools.Tool{

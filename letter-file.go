@@ -16,10 +16,8 @@ import (
 - Data: byte block
 */
 
-var (
-	// ErrIncompatibleFileFormatVersion is returned when an incompatible wire format is encountered.
-	ErrIncompatibleFileFormatVersion = errors.New("incompatible file format version")
-)
+// ErrIncompatibleFileFormatVersion is returned when an incompatible wire format is encountered.
+var ErrIncompatibleFileFormatVersion = errors.New("incompatible file format version")
 
 // ToFileFormat serializes the letter for storing it as a file.
 func (letter *Letter) ToFileFormat() (*container.Container, error) {

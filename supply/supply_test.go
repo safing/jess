@@ -7,7 +7,6 @@ import (
 )
 
 func TestSupply(t *testing.T) {
-
 	total := 10
 	supply := NewSignetSupply(total)
 	scheme := "ECDH-X25519"

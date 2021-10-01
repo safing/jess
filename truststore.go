@@ -6,14 +6,14 @@ import (
 	"sync"
 )
 
-// TrustStore filter options
+// TrustStore filter options.
 const (
 	FilterAny uint8 = iota
 	FilterSignetOnly
 	FilterRecipientOnly
 )
 
-// TrustStore errors
+// TrustStore errors.
 var (
 	ErrSignetNotFound   = errors.New("could not find signet")
 	ErrEnvelopeNotFound = errors.New("could not find envelope")
