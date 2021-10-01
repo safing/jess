@@ -18,7 +18,7 @@ const (
 	permittedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789- ._+@"
 )
 
-// TrustStore errors
+// TrustStore errors.
 var (
 	errInvalidSignetIDChars     = fmt.Errorf("this trust store only allows these characters in signet IDs: %s", permittedCharacters)
 	errInvalidEnvelopeNameChars = fmt.Errorf("this trust store only allows these characters in envelope names: %s", permittedCharacters)

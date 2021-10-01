@@ -48,7 +48,7 @@ type managedHasher struct {
 	hash hash.Hash
 }
 
-// Sum returns the hash sum of the managed hasher
+// Sum returns the hash sum of the managed hasher.
 func (sh *managedHasher) Sum() ([]byte, error) {
 	if sh == nil || sh.hash == nil {
 		return nil, errors.New("managed hasher is broken")

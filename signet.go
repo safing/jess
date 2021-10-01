@@ -12,7 +12,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-// Special signet types
+// Special signet types.
 const (
 	SignetSchemePassword = "pw"
 	SignetSchemeKey      = "key"
@@ -176,7 +176,7 @@ func (signet *Signet) LoadKey() error {
 	return signet.tool.StaticLogic.LoadKey(signet)
 }
 
-// Tool returns the tool of the signet
+// Tool returns the tool of the signet.
 func (signet *Signet) Tool() (*tools.Tool, error) {
 	// load tool
 	err := signet.loadTool()

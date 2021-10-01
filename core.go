@@ -142,7 +142,6 @@ func (s *Session) Close(data []byte) (*Letter, error) { //nolint:gocognit
 		for _, tool := range s.signers {
 			//nolint:scopelint // function is executed immediately within loop
 			err = s.envelope.LoopSenders(tool.Info().Name, func(signet *Signet) error {
-
 				sig, err := tool.Sign(data, associatedSigningData, signet)
 				if err != nil {
 					return fmt.Errorf("failed to sign with %s: %s", tool.Info().Name, err)
@@ -218,7 +217,6 @@ func (s *Session) Open(letter *Letter) ([]byte, error) { //nolint:gocognit,gocyc
 		for _, tool := range s.signers {
 			//nolint:scopelint // function is executed immediately within loop
 			err = s.envelope.LoopSenders(tool.Info().Name, func(signet *Signet) error {
-
 				err := tool.Verify(data, associatedSigningData, letter.Signatures[sigIndex].Value, signet)
 				if err != nil {
 					return fmt.Errorf("failed to verify signature (%s) with ID %s: %s", tool.Info().Name, letter.Signatures[sigIndex].ID, err)
@@ -323,7 +321,6 @@ func (s *Session) Open(letter *Letter) ([]byte, error) { //nolint:gocognit,gocyc
 
 // Verify verifies signatures of the given letter.
 func (s *Session) Verify(letter *Letter) error {
-
 	// debugging:
 	/*
 		fmt.Printf("opening: %+v\n", letter)
@@ -374,7 +371,6 @@ func (s *Session) Verify(letter *Letter) error {
 		for _, tool := range s.signers {
 			//nolint:scopelint // function is executed immediately within loop
 			err = s.envelope.LoopSenders(tool.Info().Name, func(signet *Signet) error {
-
 				err := tool.Verify(data, associatedSigningData, letter.Signatures[sigIndex].Value, signet)
 				if err != nil {
 					return fmt.Errorf("failed to verify signature (%s) with ID %s: %s", tool.Info().Name, letter.Signatures[sigIndex].ID, err)

@@ -7,7 +7,6 @@ import (
 	"github.com/safing/jess/tools"
 )
 
-//nolint:dupl
 func init() {
 	aesCtrInfo := &tools.ToolInfo{
 		Purpose:   tools.PurposeCipher,

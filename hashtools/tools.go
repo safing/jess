@@ -31,7 +31,7 @@ func Get(name string) (*HashTool, error) {
 	return hashTool, nil
 }
 
-// New returns a new hash.Hash with the given Name
+// New returns a new hash.Hash with the given name.
 func New(name string) (hash.Hash, error) {
 	hashTool, err := Get(name)
 	if err != nil {

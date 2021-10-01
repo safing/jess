@@ -91,7 +91,6 @@ func TestSuites(t *testing.T) {
 		}
 
 	}
-
 }
 
 func suiteBullshitCheck(suite *Suite) error { //nolint:gocognit,gocyclo
