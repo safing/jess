@@ -3,7 +3,7 @@ module github.com/safing/jess
 go 1.15
 
 require (
-	github.com/AlecAivazis/survey/v2 v2.0.7
+	github.com/AlecAivazis/survey/v2 v2.3.2
 	github.com/aead/ecdh v0.2.0
 	github.com/inconshreveable/mousetrap v1.0.0
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
