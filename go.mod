@@ -11,7 +11,7 @@ require (
 	github.com/mattn/go-isatty v0.0.14
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 	github.com/mr-tron/base58 v1.2.0
-	github.com/safing/portbase v0.11.0
+	github.com/safing/portbase v0.12.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/pflag v1.0.5
