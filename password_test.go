@@ -21,6 +21,8 @@ func getTestPassword(signet *Signet) error {
 }
 
 func TestCalculatePasswordSecurityLevel(t *testing.T) {
+	t.Parallel()
+
 	// basic weak
 	testPWSL(t, "asdf", -1)
 	testPWSL(t, "asdfasdf", -1)
@@ -82,6 +84,8 @@ func TestCalculatePasswordSecurityLevel(t *testing.T) {
 }
 
 func testPWSL(t *testing.T, password string, expectedSecurityLevel int) {
+	t.Helper()
+
 	securityLevel := CalculatePasswordSecurityLevel(password, 1<<20)
 
 	if securityLevel < expectedSecurityLevel {

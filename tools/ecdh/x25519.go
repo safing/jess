@@ -2,11 +2,12 @@ package ecdh
 
 import (
 	"crypto"
+	"fmt"
+
+	"github.com/aead/ecdh"
 
 	"github.com/safing/jess/tools"
 	"github.com/safing/portbase/container"
-
-	"github.com/aead/ecdh"
 )
 
 func init() {
@@ -87,10 +88,16 @@ func (ec *X25519Curve) StoreKey(signet tools.SignetInt) error {
 	c.AppendNumber(1)
 
 	// store keys
-	pubKeyData := pubKey.([32]byte)
+	pubKeyData, ok := pubKey.([32]byte)
+	if !ok {
+		return fmt.Errorf("public key of invalid type %T", pubKey)
+	}
 	c.Append(pubKeyData[:])
 	if !public {
-		privKeyData := privKey.([32]byte)
+		privKeyData, ok := privKey.([32]byte)
+		if !ok {
+			return fmt.Errorf("private key of invalid type %T", privKey)
+		}
 		c.Append(privKeyData[:])
 	}
 

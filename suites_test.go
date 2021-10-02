@@ -11,6 +11,8 @@ import (
 )
 
 func getSuite(t *testing.T, suiteID string) (suite *Suite) {
+	t.Helper()
+
 	suite, ok := GetSuite(suiteID)
 	if !ok {
 		t.Fatalf("suite %s does not exist", suiteID)
@@ -20,6 +22,8 @@ func getSuite(t *testing.T, suiteID string) (suite *Suite) {
 }
 
 func TestSuites(t *testing.T) {
+	t.Parallel()
+
 	for _, suite := range Suites() {
 
 		err := suiteBullshitCheck(suite)
@@ -120,9 +124,9 @@ func suiteBullshitCheck(suite *Suite) error { //nolint:gocognit,gocyclo
 	// tool check loop: start
 	for i, toolID := range suite.Tools {
 
-		////////////////////////////////////////
+		// =====================================
 		// tool check loop: check for duplicates
-		////////////////////////////////////////
+		// =====================================
 
 		for j, dupeToolID := range suite.Tools {
 			if i != j && toolID == dupeToolID {
@@ -130,9 +134,9 @@ func suiteBullshitCheck(suite *Suite) error { //nolint:gocognit,gocyclo
 			}
 		}
 
-		///////////////////////////////////////
+		// ====================================
 		// tool check loop: parse, prep and get
-		///////////////////////////////////////
+		// ====================================
 
 		var (
 			hashTool  *hashtools.HashTool
@@ -160,9 +164,9 @@ func suiteBullshitCheck(suite *Suite) error { //nolint:gocognit,gocyclo
 			s.toolsWithState = append(s.toolsWithState, logic)
 		}
 
-		///////////////////////////////////////////////////////////////
+		// ============================================================
 		// tool check loop: assign tools to queues and add requirements
-		///////////////////////////////////////////////////////////////
+		// ============================================================
 
 		switch tool.Info.Purpose {
 		case tools.PurposeKeyDerivation:
@@ -205,9 +209,9 @@ func suiteBullshitCheck(suite *Suite) error { //nolint:gocognit,gocyclo
 			s.toolRequirements.Add(Integrity)
 		}
 
-		////////////////////////////////////////////////
+		// =============================================
 		// tool check loop: process options, get hashers
-		////////////////////////////////////////////////
+		// =============================================
 
 		for _, option := range tool.Info.Options {
 			switch option {
@@ -259,9 +263,9 @@ func suiteBullshitCheck(suite *Suite) error { //nolint:gocognit,gocyclo
 			}
 		}
 
-		///////////////////////////////////
+		// ================================
 		// tool check loop: initialize tool
-		///////////////////////////////////
+		// ================================
 
 		// init tool
 		logic.Init(
@@ -274,9 +278,9 @@ func suiteBullshitCheck(suite *Suite) error { //nolint:gocognit,gocyclo
 			hashSumFn,
 		)
 
-		//////////////////////////////////////////////////
+		// ===============================================
 		// tool check loop: calc and check security levels
-		//////////////////////////////////////////////////
+		// ===============================================
 
 		err = s.calcAndCheckSecurityLevel(logic, nil)
 		if err != nil {
@@ -285,9 +289,9 @@ func suiteBullshitCheck(suite *Suite) error { //nolint:gocognit,gocyclo
 
 	} // tool check loop: end
 
-	///////////////
+	// ============
 	// final checks
-	///////////////
+	// ============
 
 	// check requirements requirements
 	if s.toolRequirements.Empty() {
@@ -319,9 +323,9 @@ func suiteBullshitCheck(suite *Suite) error { //nolint:gocognit,gocyclo
 		return errors.New("key derivation tool specified, but not needed")
 	}
 
-	/////////////////////////////////////////
+	// ======================================
 	// check if values match suite definition
-	/////////////////////////////////////////
+	// ======================================
 
 	// check if security level matches
 	if s.SecurityLevel != suite.SecurityLevel {
@@ -337,9 +341,9 @@ func suiteBullshitCheck(suite *Suite) error { //nolint:gocognit,gocyclo
 		)
 	}
 
-	///////////////////////////////////////////////////////////
+	// ========================================================
 	// check if computeSuiteAttributes returns the same results
-	///////////////////////////////////////////////////////////
+	// ========================================================
 
 	computedSuite := computeSuiteAttributes(suite.Tools, assumeKey)
 	if computedSuite == nil {
@@ -360,23 +364,23 @@ func suiteBullshitCheck(suite *Suite) error { //nolint:gocognit,gocyclo
 }
 
 func computeSuiteAttributes(toolIDs []string, assumeKey bool) *Suite {
-	new := &Suite{
+	newSuite := &Suite{
 		Provides:      newEmptyRequirements(),
 		SecurityLevel: 0,
 	}
 
 	// if we have a key
 	if assumeKey {
-		new.Provides.Add(SenderAuthentication)
-		new.Provides.Add(RecipientAuthentication)
+		newSuite.Provides.Add(SenderAuthentication)
+		newSuite.Provides.Add(RecipientAuthentication)
 	}
 
 	// check all security levels and collect attributes
 	for _, toolID := range toolIDs {
 
-		///////////////////////////////////////
+		// ====================================
 		// tool check loop: parse, prep and get
-		///////////////////////////////////////
+		// ====================================
 
 		var hashTool *hashtools.HashTool
 
@@ -397,38 +401,38 @@ func computeSuiteAttributes(toolIDs []string, assumeKey bool) *Suite {
 		// create logic instance and add to logic and state lists
 		logic := tool.Factory()
 
-		//////////////////////////////////////
+		// ===================================
 		// tool check loop: collect attributes
-		//////////////////////////////////////
+		// ===================================
 
 		switch tool.Info.Purpose {
 		case tools.PurposePassDerivation:
-			new.Provides.Add(SenderAuthentication)
-			new.Provides.Add(RecipientAuthentication)
+			newSuite.Provides.Add(SenderAuthentication)
+			newSuite.Provides.Add(RecipientAuthentication)
 
 		case tools.PurposeKeyExchange:
-			new.Provides.Add(RecipientAuthentication)
+			newSuite.Provides.Add(RecipientAuthentication)
 
 		case tools.PurposeKeyEncapsulation:
-			new.Provides.Add(RecipientAuthentication)
+			newSuite.Provides.Add(RecipientAuthentication)
 
 		case tools.PurposeSigning:
-			new.Provides.Add(SenderAuthentication)
+			newSuite.Provides.Add(SenderAuthentication)
 
 		case tools.PurposeIntegratedCipher:
-			new.Provides.Add(Confidentiality)
-			new.Provides.Add(Integrity)
+			newSuite.Provides.Add(Confidentiality)
+			newSuite.Provides.Add(Integrity)
 
 		case tools.PurposeCipher:
-			new.Provides.Add(Confidentiality)
+			newSuite.Provides.Add(Confidentiality)
 
 		case tools.PurposeMAC:
-			new.Provides.Add(Integrity)
+			newSuite.Provides.Add(Integrity)
 		}
 
-		////////////////////////////////////////////////
+		// =============================================
 		// tool check loop: process options, get hashers
-		////////////////////////////////////////////////
+		// =============================================
 
 		for _, option := range tool.Info.Options {
 			switch option {
@@ -441,9 +445,9 @@ func computeSuiteAttributes(toolIDs []string, assumeKey bool) *Suite {
 			}
 		}
 
-		///////////////////////////////////
+		// ================================
 		// tool check loop: initialize tool
-		///////////////////////////////////
+		// ================================
 
 		// init tool
 		logic.Init(
@@ -455,19 +459,19 @@ func computeSuiteAttributes(toolIDs []string, assumeKey bool) *Suite {
 			nil,
 		)
 
-		//////////////////////////////////////////
+		// =======================================
 		// tool check loop: compute security level
-		//////////////////////////////////////////
+		// =======================================
 
 		toolSecurityLevel, err := logic.SecurityLevel(nil)
 		if err != nil {
 			return nil
 		}
-		if new.SecurityLevel == 0 || toolSecurityLevel < new.SecurityLevel {
-			new.SecurityLevel = toolSecurityLevel
+		if newSuite.SecurityLevel == 0 || toolSecurityLevel < newSuite.SecurityLevel {
+			newSuite.SecurityLevel = toolSecurityLevel
 		}
 
 	}
 
-	return new
+	return newSuite
 }

@@ -11,7 +11,6 @@ import (
 	"fmt"
 
 	"github.com/safing/portbase/container"
-
 	"github.com/safing/portbase/formats/dsd"
 )
 
@@ -186,7 +185,7 @@ func LetterFromDSD(data []byte) (*Letter, error) {
 
 const (
 	// Field IDs for signing
-	// These IDs MUST NOT CHANGE
+	// These IDs MUST NOT CHANGE.
 
 	fieldIDLetterVersion uint64 = 1 // signed, MAC'd (may not exist when wired)
 	fieldIDLetterSuiteID uint64 = 2 // signed, MAC'd (may not exist when wired)

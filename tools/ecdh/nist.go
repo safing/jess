@@ -3,12 +3,13 @@ package ecdh
 import (
 	"crypto"
 	"crypto/elliptic"
+	"fmt"
 	"math/big"
+
+	"github.com/aead/ecdh"
 
 	"github.com/safing/jess/tools"
 	"github.com/safing/portbase/container"
-
-	"github.com/aead/ecdh"
 )
 
 var nistCurveInfo = &tools.ToolInfo{
@@ -115,7 +116,10 @@ func (ec *NistCurve) StoreKey(signet tools.SignetInt) error {
 	c.AppendNumber(1)
 
 	// store public key
-	curvePoint := pubKey.(ecdh.Point)
+	curvePoint, ok := pubKey.(ecdh.Point)
+	if !ok {
+		return fmt.Errorf("public key of invalid type %T", pubKey)
+	}
 	c.AppendAsBlock(curvePoint.X.Bytes())
 	c.AppendAsBlock(curvePoint.Y.Bytes())
 

@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/safing/jess/hashtools"
-
-	"github.com/safing/jess/tools"
-
 	"github.com/AlecAivazis/survey/v2"
+
+	"github.com/safing/jess/hashtools"
+	"github.com/safing/jess/tools"
 )
 
 func pickTools(toolNames []string, promptMsg string) ([]string, error) { //nolint:unused,deadcode // TODO

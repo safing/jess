@@ -4,9 +4,9 @@ import (
 	"crypto/sha256"
 	"hash"
 
-	"github.com/safing/jess/tools"
-
 	"golang.org/x/crypto/pbkdf2"
+
+	"github.com/safing/jess/tools"
 )
 
 func init() {

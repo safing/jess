@@ -1,7 +1,7 @@
 package jess
 
 var (
-	// must be var in order decrease for testing for better speed
+	// Must be var in order decrease for testing for better speed.
 
 	defaultSecurityLevel = 128
 	minimumSecurityLevel = 0

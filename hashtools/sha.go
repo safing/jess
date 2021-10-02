@@ -3,11 +3,11 @@ package hashtools
 import (
 	"crypto"
 
-	// register SHA2 in Go's internal registry
+	// Register SHA2 in Go's internal registry.
 	_ "crypto/sha256"
 	_ "crypto/sha512"
 
-	// register SHA3 in Go's internal registry
+	// Register SHA3 in Go's internal registry.
 	_ "golang.org/x/crypto/sha3"
 )
 

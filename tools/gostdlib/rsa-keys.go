@@ -8,7 +8,6 @@ import (
 	"math/big"
 
 	"github.com/safing/jess/tools"
-
 	"github.com/safing/portbase/container"
 )
 
@@ -163,7 +162,7 @@ func (base *rsaBase) SecurityLevel(signet tools.SignetInt) (int, error) {
 	if pubkey == nil {
 		err := signet.LoadKey()
 		if err != nil {
-			return 0, fmt.Errorf("failed to load key to calculate security level: %s", err)
+			return 0, fmt.Errorf("failed to load key to calculate security level: %w", err)
 		}
 		pubkey = signet.PublicKey()
 	}

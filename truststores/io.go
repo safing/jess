@@ -27,7 +27,7 @@ func WriteSignetToFile(signet *jess.Signet, filename string) error {
 	}
 
 	// write
-	err = ioutil.WriteFile(filename, data, 0600)
+	err = ioutil.WriteFile(filename, data, 0600) //nolint:gofumpt // gofumpt is ignorant of octal numbers.
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func WriteEnvelopeToFile(envelope *jess.Envelope, filename string) error {
 	}
 
 	// write to storage
-	err = ioutil.WriteFile(filename, data, 0600)
+	err = ioutil.WriteFile(filename, data, 0600) //nolint:gofumpt // gofumpt is ignorant of octal numbers.
 	if err != nil {
 		return err
 	}

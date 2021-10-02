@@ -3,7 +3,7 @@ package jess
 import (
 	"github.com/safing/jess/tools"
 
-	// import all tools
+	// Import all tools.
 	_ "github.com/safing/jess/tools/all"
 )
 

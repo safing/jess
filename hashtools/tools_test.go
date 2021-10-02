@@ -3,6 +3,8 @@ package hashtools
 import "testing"
 
 func TestAll(t *testing.T) {
+	t.Parallel()
+
 	testData := []byte("The quick brown fox jumps over the lazy dog. ")
 
 	all := AsList()

@@ -1,9 +1,9 @@
 package gostdlib
 
 import (
-	"github.com/safing/jess/tools"
-
 	"golang.org/x/crypto/salsa20"
+
+	"github.com/safing/jess/tools"
 )
 
 func init() {

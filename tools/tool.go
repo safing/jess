@@ -32,7 +32,7 @@ type ToolInfo struct {
 
 // Tool Purposes.
 const (
-	// Key Management and Creation, as well as Authenticity
+	// Key Management and Creation, as well as Authenticity.
 
 	// PurposeKeyDerivation declares key derivation capabilities.
 	PurposeKeyDerivation uint8 = iota + 1
@@ -56,7 +56,7 @@ const (
 	// Provides SenderAuthentication attribute. Theoretically also provides integrity, but as signing is done after everything else, it will not be able to detect a wrong key during decryption.
 	PurposeSigning
 
-	// Confidentiality and Integrity
+	// Confidentiality and Integrity.
 
 	// PurposeIntegratedCipher declares that the tool provides both encryption and integrity verification capabilities.
 	// Provies Confidentiality and Integrity requirements.
@@ -73,13 +73,13 @@ const (
 
 // Tool Options.
 const (
-	// Operation
+	// Operation Types.
 
 	// OptionStreaming declares that the tool can work with streaming data and might be given a io.Reader and io.Writer instead of just a []byte slice.
 	// TODO: Implementation pending.
 	OptionStreaming uint8 = iota + 1
 
-	// Needs
+	// Needs.
 
 	// OptionNeedsManagedHasher declares that the tool requires a hashing algorithm to work. It will automatically hash everything that needs to be authenticated and may be shared with other algorithms.
 	OptionNeedsManagedHasher

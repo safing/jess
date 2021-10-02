@@ -28,14 +28,14 @@ func (s *Session) Close(data []byte) (*Letter, error) { //nolint:gocognit
 		data = copiedData
 	}
 
-	/////////////////
+	// ==============
 	// key management
-	/////////////////
+	// ==============
 
 	// create nonce
 	nonce, err := RandomBytes(s.NonceSize())
 	if err != nil {
-		return nil, fmt.Errorf("failed to get nonce: %s", err)
+		return nil, fmt.Errorf("failed to get nonce: %w", err)
 	}
 	letter.Nonce = nonce
 
@@ -57,13 +57,13 @@ func (s *Session) Close(data []byte) (*Letter, error) { //nolint:gocognit
 			// init KDF
 			err = s.kdf.InitKeyDerivation(letter.Nonce, keyMaterial...)
 			if err != nil {
-				return nil, fmt.Errorf("failed to init %s kdf: %s", s.kdf.Info().Name, err)
+				return nil, fmt.Errorf("failed to init %s kdf: %w", s.kdf.Info().Name, err)
 			}
 		}
 
-		/////////////
+		// ==========
 		// encryption
-		/////////////
+		// ==========
 
 		// setup tools
 		err = s.setup()
@@ -76,7 +76,7 @@ func (s *Session) Close(data []byte) (*Letter, error) { //nolint:gocognit
 		for _, tool := range s.ciphers {
 			data, err = tool.Encrypt(data)
 			if err != nil {
-				return nil, fmt.Errorf("failed to encrypt with %s: %s", tool.Info().Name, err)
+				return nil, fmt.Errorf("failed to encrypt with %s: %w", tool.Info().Name, err)
 			}
 		}
 
@@ -89,7 +89,7 @@ func (s *Session) Close(data []byte) (*Letter, error) { //nolint:gocognit
 		for _, tool := range s.integratedCiphers {
 			data, err = tool.AuthenticatedEncrypt(data, associatedData)
 			if err != nil {
-				return nil, fmt.Errorf("failed to auth-encrypt with %s: %s", tool.Info().Name, err)
+				return nil, fmt.Errorf("failed to auth-encrypt with %s: %w", tool.Info().Name, err)
 			}
 		}
 
@@ -109,7 +109,7 @@ func (s *Session) Close(data []byte) (*Letter, error) { //nolint:gocognit
 			for _, tool := range s.macs {
 				mac, err := tool.MAC(data, associatedData)
 				if err != nil {
-					return nil, fmt.Errorf("failed to calculate MAC with %s: %s", tool.Info().Name, err)
+					return nil, fmt.Errorf("failed to calculate MAC with %s: %w", tool.Info().Name, err)
 				}
 				allMacs.Append(mac)
 			}
@@ -144,7 +144,7 @@ func (s *Session) Close(data []byte) (*Letter, error) { //nolint:gocognit
 			err = s.envelope.LoopSenders(tool.Info().Name, func(signet *Signet) error {
 				sig, err := tool.Sign(data, associatedSigningData, signet)
 				if err != nil {
-					return fmt.Errorf("failed to sign with %s: %s", tool.Info().Name, err)
+					return fmt.Errorf("failed to sign with %s: %w", tool.Info().Name, err)
 				}
 
 				letter.Signatures = append(letter.Signatures, &Seal{
@@ -180,9 +180,9 @@ func (s *Session) Open(letter *Letter) ([]byte, error) { //nolint:gocognit,gocyc
 		return nil, fmt.Errorf("unsupported letter version: %d", letter.Version)
 	}
 
-	/////////
+	// ======
 	// verify
-	/////////
+	// ======
 
 	// TODO: signature verification is run before tool setup. Currently, this is ok, but might change in the future. This might break additional signing algorithms that actually need setup.
 
@@ -219,7 +219,7 @@ func (s *Session) Open(letter *Letter) ([]byte, error) { //nolint:gocognit,gocyc
 			err = s.envelope.LoopSenders(tool.Info().Name, func(signet *Signet) error {
 				err := tool.Verify(data, associatedSigningData, letter.Signatures[sigIndex].Value, signet)
 				if err != nil {
-					return fmt.Errorf("failed to verify signature (%s) with ID %s: %s", tool.Info().Name, letter.Signatures[sigIndex].ID, err)
+					return fmt.Errorf("failed to verify signature (%s) with ID %s: %w", tool.Info().Name, letter.Signatures[sigIndex].ID, err)
 				}
 
 				sigIndex++
@@ -240,9 +240,9 @@ func (s *Session) Open(letter *Letter) ([]byte, error) { //nolint:gocognit,gocyc
 		return data, nil
 	}
 
-	/////////////////
+	// ==============
 	// key management
-	/////////////////
+	// ==============
 
 	// key establishment
 	if s.wire != nil {
@@ -259,13 +259,13 @@ func (s *Session) Open(letter *Letter) ([]byte, error) { //nolint:gocognit,gocyc
 		// init KDF
 		err = s.kdf.InitKeyDerivation(letter.Nonce, keyMaterial...)
 		if err != nil {
-			return nil, fmt.Errorf("failed to init %s kdf: %s", s.kdf.Info().Name, err)
+			return nil, fmt.Errorf("failed to init %s kdf: %w", s.kdf.Info().Name, err)
 		}
 	}
 
-	/////////////
+	// ==========
 	// decryption
-	/////////////
+	// ==========
 
 	// setup tools
 	err = s.setup()
@@ -291,7 +291,7 @@ func (s *Session) Open(letter *Letter) ([]byte, error) { //nolint:gocognit,gocyc
 		for _, tool := range s.macs {
 			mac, err := tool.MAC(data, associatedData)
 			if err != nil {
-				return nil, fmt.Errorf("failed to calculate MAC with %s: %s", tool.Info().Name, err)
+				return nil, fmt.Errorf("failed to calculate MAC with %s: %w", tool.Info().Name, err)
 			}
 			allMacs.Append(mac)
 		}
@@ -334,9 +334,9 @@ func (s *Session) Verify(letter *Letter) error {
 		return fmt.Errorf("unsupported letter version: %d", letter.Version)
 	}
 
-	/////////
+	// ======
 	// verify
-	/////////
+	// ======
 
 	// TODO: signature verification is run before tool setup. Currently, this is ok, but might change in the future. This might break additional signing algorithms that actually need setup.
 
@@ -373,7 +373,7 @@ func (s *Session) Verify(letter *Letter) error {
 			err = s.envelope.LoopSenders(tool.Info().Name, func(signet *Signet) error {
 				err := tool.Verify(data, associatedSigningData, letter.Signatures[sigIndex].Value, signet)
 				if err != nil {
-					return fmt.Errorf("failed to verify signature (%s) with ID %s: %s", tool.Info().Name, letter.Signatures[sigIndex].ID, err)
+					return fmt.Errorf("failed to verify signature (%s) with ID %s: %w", tool.Info().Name, letter.Signatures[sigIndex].ID, err)
 				}
 
 				sigIndex++
@@ -413,7 +413,7 @@ func (s *Session) setupClosingKeyMaterial(letter *Letter) ([][]byte, error) {
 		}
 		pwKey, err := s.passDerivator.DeriveKeyFromPassword(signet.Key, letter.Nonce)
 		if err != nil {
-			return fmt.Errorf("failed to get derive key from password with %s: %s", s.passDerivator.Info().Name, err)
+			return fmt.Errorf("failed to get derive key from password with %s: %w", s.passDerivator.Info().Name, err)
 		}
 		letter.Keys = append(letter.Keys, &Seal{
 			Scheme: SignetSchemePassword,
@@ -436,23 +436,23 @@ func (s *Session) setupClosingKeyMaterial(letter *Letter) ([][]byte, error) {
 			senderSignet := NewSignetBase(tool.Definition())
 			err := senderSignet.GenerateKey()
 			if err != nil {
-				return fmt.Errorf("failed to generate new sender signet for %s: %s", tool.Info().Name, err)
+				return fmt.Errorf("failed to generate new sender signet for %s: %w", tool.Info().Name, err)
 			}
 
 			// create exchange and add to letter
 			exchKey, err := tool.MakeSharedKey(senderSignet, recipient)
 			if err != nil {
-				return fmt.Errorf("failed to make managed key with %s: %s", tool.Info().Name, err)
+				return fmt.Errorf("failed to make managed key with %s: %w", tool.Info().Name, err)
 			}
 
 			// add to letter
 			senderRcpt, err := senderSignet.AsRecipient() // convert to public signet
 			if err != nil {
-				return fmt.Errorf("failed to get public sender signet for %s: %s", tool.Info().Name, err)
+				return fmt.Errorf("failed to get public sender signet for %s: %w", tool.Info().Name, err)
 			}
 			err = senderRcpt.StoreKey()
 			if err != nil {
-				return fmt.Errorf("failed to serialize sender public key for %s: %s", tool.Info().Name, err)
+				return fmt.Errorf("failed to serialize sender public key for %s: %w", tool.Info().Name, err)
 			}
 			letter.Keys = append(letter.Keys, &Seal{
 				ID:    recipient.ID,
@@ -492,13 +492,13 @@ func (s *Session) setupClosingKeyMaterial(letter *Letter) ([][]byte, error) {
 			// generate new key
 			newKey, err := RandomBytes(tool.Helper().DefaultSymmetricKeySize())
 			if err != nil {
-				return fmt.Errorf("failed to generate new key for %s: %s", tool.Info().Name, err)
+				return fmt.Errorf("failed to generate new key for %s: %w", tool.Info().Name, err)
 			}
 
 			// encapsulate key
 			wrappedKey, err := tool.EncapsulateKey(newKey, recipient)
 			if err != nil {
-				return fmt.Errorf("failed to encapsulate key with %s: %s", tool.Info().Name, err)
+				return fmt.Errorf("failed to encapsulate key with %s: %w", tool.Info().Name, err)
 			}
 
 			// add to letter
@@ -553,7 +553,7 @@ func (s *Session) setupOpeningKeyMaterial(letter *Letter) ([][]byte, error) {
 		}
 		pwKey, err := s.passDerivator.DeriveKeyFromPassword(signet.Key, letter.Nonce)
 		if err != nil {
-			return fmt.Errorf("failed to get derive key from password with %s: %s", s.passDerivator.Info().Name, err)
+			return fmt.Errorf("failed to get derive key from password with %s: %w", s.passDerivator.Info().Name, err)
 		}
 
 		keyMaterial = append(keyMaterial, pwKey)
@@ -579,7 +579,7 @@ func (s *Session) setupOpeningKeyMaterial(letter *Letter) ([][]byte, error) {
 			// load key
 			err := peerSignet.LoadKey()
 			if err != nil {
-				return fmt.Errorf("failed to load ephermal signet for key exchange: %s", err)
+				return fmt.Errorf("failed to load ephermal signet for key exchange: %w", err)
 			}
 			// save to state
 			if s.wire != nil {
@@ -592,7 +592,7 @@ func (s *Session) setupOpeningKeyMaterial(letter *Letter) ([][]byte, error) {
 			// make shared key
 			exchKey, err := tool.MakeSharedKey(signet, peerSignet)
 			if err != nil {
-				return fmt.Errorf("failed to make shared key with %s: %s", tool.Info().Name, err)
+				return fmt.Errorf("failed to make shared key with %s: %w", tool.Info().Name, err)
 			}
 
 			// add key
@@ -638,7 +638,7 @@ func (s *Session) setup() error {
 	for _, tool := range s.toolsWithState {
 		err := tool.Setup()
 		if err != nil {
-			return fmt.Errorf("failed to run tool %s setup: %s", tool.Info().Name, err)
+			return fmt.Errorf("failed to run tool %s setup: %w", tool.Info().Name, err)
 		}
 	}
 
@@ -651,7 +651,7 @@ func (s *Session) reset() error {
 	for _, tool := range s.toolsWithState {
 		err := tool.Reset()
 		if err != nil {
-			return fmt.Errorf("failed to run tool %s reset: %s", tool.Info().Name, err)
+			return fmt.Errorf("failed to run tool %s reset: %w", tool.Info().Name, err)
 		}
 	}
 
@@ -662,7 +662,7 @@ func (s *Session) feedManagedHashers(managedHashers map[string]*managedHasher, d
 	for _, mngdHasher := range managedHashers {
 		n, err := mngdHasher.hash.Write(data)
 		if err != nil {
-			return fmt.Errorf("failed to write data to managed hasher %s: %s", mngdHasher.tool.Name, err)
+			return fmt.Errorf("failed to write data to managed hasher %s: %w", mngdHasher.tool.Name, err)
 		}
 		if n != len(data) {
 			return fmt.Errorf("failed to fully write data to managed hasher %s", mngdHasher.tool.Name)
@@ -670,7 +670,7 @@ func (s *Session) feedManagedHashers(managedHashers map[string]*managedHasher, d
 
 		n, err = mngdHasher.hash.Write(associatedData)
 		if err != nil {
-			return fmt.Errorf("failed to write associated data to managed hasher %s: %s", mngdHasher.tool.Name, err)
+			return fmt.Errorf("failed to write associated data to managed hasher %s: %w", mngdHasher.tool.Name, err)
 		}
 		if n != len(associatedData) {
 			return fmt.Errorf("failed to fully write associated data to managed hasher %s", mngdHasher.tool.Name)

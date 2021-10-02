@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"github.com/safing/jess"
-
 	"github.com/safing/jess/tools"
 )
 

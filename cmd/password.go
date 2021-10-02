@@ -2,7 +2,7 @@ package main
 
 import (
 	"bufio"
-	"crypto/sha1" //nolint:gosec // required for HIBP API
+	"crypto/sha1"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -10,9 +10,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/safing/jess"
-
 	"github.com/AlecAivazis/survey/v2"
+
+	"github.com/safing/jess"
 )
 
 func registerPasswordCallbacks() {
@@ -115,7 +115,7 @@ func checkForWeakPassword(pw string) error {
 	// request hash list
 	resp, err := http.Get(fmt.Sprintf("https://api.pwnedpasswords.com/range/%s", prefix))
 	if err != nil {
-		return fmt.Errorf("failed to contact HIBP service: %s", err)
+		return fmt.Errorf("failed to contact HIBP service: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -139,7 +139,7 @@ func checkForWeakPassword(pw string) error {
 	}
 	// fmt.Printf("checked %d leaked passwords\n", cnt)
 	if err := scanner.Err(); err != nil {
-		return fmt.Errorf("failed to read HIBP response: %s", err)
+		return fmt.Errorf("failed to read HIBP response: %w", err)
 	}
 
 	return nil

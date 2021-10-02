@@ -6,8 +6,9 @@ import (
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/safing/jess"
 	"github.com/spf13/cobra"
+
+	"github.com/safing/jess"
 )
 
 const (
@@ -94,7 +95,7 @@ func manageSignets() error {
 		case "Delete":
 			err = trustStore.DeleteSignet(selectedSignet.ID, selectedSignet.Public)
 			if err != nil {
-				return nil
+				return err
 			}
 		case "Back to list":
 			continue

@@ -1,11 +1,11 @@
 package jess
 
 var (
-	// lists
+	// Suite Lists.
 	suitesMap  = make(map[string]*Suite)
 	suitesList []*Suite
 
-	// suite definitions
+	// Suite Definitions.
 
 	// SuiteKeyV1 is a cipher suite for encryption with a key.
 	SuiteKeyV1 = registerSuite(&Suite{
@@ -56,7 +56,7 @@ var (
 		Status:        SuiteStatusRecommended,
 	})
 
-	// currently recommended suites
+	// Currently Recommended Suites.
 
 	// SuiteKey is a a cipher suite for encryption with a key.
 	SuiteKey = SuiteKeyV1

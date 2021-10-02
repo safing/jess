@@ -3,11 +3,10 @@ package main
 import (
 	"errors"
 
-	"github.com/safing/jess/truststores"
+	"github.com/spf13/cobra"
 
 	"github.com/safing/jess"
-
-	"github.com/spf13/cobra"
+	"github.com/safing/jess/truststores"
 )
 
 func init() {
@@ -34,7 +33,7 @@ var configureCmd = &cobra.Command{
 
 		// get envelope from trust store
 		envelope, err := trustStore.GetEnvelope(envelopeName)
-		if err != nil && err != jess.ErrEnvelopeNotFound {
+		if err != nil && !errors.Is(err, jess.ErrEnvelopeNotFound) {
 			return err
 		}
 

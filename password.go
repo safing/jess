@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	// ASCII printable characters (character codes 32-127)
+	// ASCII printable characters (character codes 32-127).
 	passwordCharSets = []string{
 		"abcdefghijklmnopqrstuvwxyz",
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -16,7 +16,7 @@ var (
 	}
 
 	// extended ASCII codes (character code 128-255)
-	// assume pool size of 32 (a quarter), as not all of them are common / easily accessible on every keyboard
+	// assume pool size of 32 (a quarter), as not all of them are common / easily accessible on every keyboard.
 	passwordExtraPoolSize = 32
 
 	createPasswordCallback func(signet *Signet, minSecurityLevel int) error

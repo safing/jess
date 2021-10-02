@@ -15,6 +15,8 @@ var (
 )
 
 func testAlgorithm(t *testing.T, alg Algorithm, emptyHex, foxHex string) {
+	t.Helper()
+
 	// setup
 	emptyBytes, err := hex.DecodeString(emptyHex)
 	if err != nil {
@@ -84,6 +86,8 @@ func testAlgorithm(t *testing.T, alg Algorithm, emptyHex, foxHex string) {
 }
 
 func testFormat(t *testing.T, alg Algorithm, lhs, loaded *LabeledHash) {
+	t.Helper()
+
 	noMatchLH := Digest(alg, noMatchData)
 
 	// Test equality.
@@ -110,6 +114,8 @@ func testFormat(t *testing.T, alg Algorithm, lhs, loaded *LabeledHash) {
 }
 
 func TestHash(t *testing.T) {
+	t.Parallel()
+
 	testAlgorithm(t, SHA2_256,
 		"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 		"ef537f25c895bfa782526529a9b63d97aa631564d5d789c2b765448c8635fb6c",

@@ -7,14 +7,13 @@ import (
 	"time"
 
 	"github.com/safing/jess/hashtools"
-
 	"github.com/safing/jess/tools"
-
-	// import all tools for testing
 	_ "github.com/safing/jess/tools/all"
 )
 
 func TestConformity(t *testing.T) {
+	t.Parallel()
+
 	// Test that every tool only provides one primary feature, as this enables to automatically assign a distinct role to every tool.
 
 	for _, tool := range tools.AsList() {
@@ -35,7 +34,7 @@ func TestConformity(t *testing.T) {
 	}
 }
 
-func TestPasswordHashingSpeed(t *testing.T) {
+func TestPasswordHashingSpeed(t *testing.T) { //nolint:paralleltest
 	// skip in short tests and when not running comprehensive
 	if testing.Short() || !runComprehensiveTestsActive {
 		return
@@ -63,6 +62,8 @@ func TestPasswordHashingSpeed(t *testing.T) {
 
 //nolint:gocognit,gocyclo
 func TestSignetHandling(t *testing.T) {
+	t.Parallel()
+
 	hashTool, err := hashtools.Get("SHA2-256")
 	if err != nil {
 		t.Fatal(err)

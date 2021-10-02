@@ -181,7 +181,7 @@ func (e *Envelope) prepSignets(signets []*Signet, recipients bool, storage Trust
 			if signet.Scheme == SignetSchemePassword {
 				err := fillPassword(signet, !recipients, storage, e.suite.SecurityLevel)
 				if err != nil {
-					return fmt.Errorf(`failed to get password for "%s": %s`, signet.ID, err)
+					return fmt.Errorf(`failed to get password for "%s": %w`, signet.ID, err)
 				}
 				continue
 			}
@@ -202,19 +202,19 @@ func (e *Envelope) prepSignets(signets []*Signet, recipients bool, storage Trust
 			}
 
 			// get signet from trust store
-			new, err := storage.GetSignet(signet.ID, recipients)
+			newSignet, err := storage.GetSignet(signet.ID, recipients)
 			if err != nil {
-				return fmt.Errorf(`failed to get signet with ID "%s" from truststore: %s`, signet.ID, err)
+				return fmt.Errorf(`failed to get signet with ID "%s" from truststore: %w`, signet.ID, err)
 			}
 
 			// check for scheme mismatch
-			if signet.Scheme != "" && signet.Scheme != new.Scheme {
-				return fmt.Errorf(`failed to apply signet with ID "%s" from truststore: was expected to be of type %s, but is %s`, signet.ID, signet.Scheme, new.Scheme)
+			if signet.Scheme != "" && signet.Scheme != newSignet.Scheme {
+				return fmt.Errorf(`failed to apply signet with ID "%s" from truststore: was expected to be of type %s, but is %s`, signet.ID, signet.Scheme, newSignet.Scheme)
 			}
 
 			// apply signet back into envelope
-			signet = new
-			signets[i] = new
+			signet = newSignet
+			signets[i] = newSignet
 		}
 
 		// unwrap protection
@@ -252,12 +252,12 @@ func fillPassword(signet *Signet, createPassword bool, storage TrustStore, minSe
 		// check trust store for name
 		if len(signet.ID) > 0 && storage != nil {
 			// get signet from trust store
-			new, err := storage.GetSignet(signet.ID, false)
-			if err == nil && new.Info != nil {
+			newSignet, err := storage.GetSignet(signet.ID, false)
+			if err == nil && newSignet.Info != nil {
 				if signet.Info == nil {
-					signet.Info = new.Info
+					signet.Info = newSignet.Info
 				} else {
-					signet.Info.Name = new.Info.Name
+					signet.Info.Name = newSignet.Info.Name
 				}
 			}
 		}

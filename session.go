@@ -86,18 +86,18 @@ func newSession(e *Envelope) (*Session, error) { //nolint:gocognit,gocyclo
 
 	// prepare variables
 	var (
-		keySourceAvailable    bool = false
+		keySourceAvailable    bool
 		totalSignetsSeen      int
-		requireSecurityLevel  bool = false
-		requireDefaultKeySize bool = false
+		requireSecurityLevel  bool
+		requireDefaultKeySize bool
 	)
 
 	// tool init loop: start
 	for i, toolID := range s.envelope.suite.Tools {
 
-		///////////////////////////////////////
+		// ====================================
 		// tool init loop: check for duplicates
-		///////////////////////////////////////
+		// ====================================
 
 		for j, dupeToolID := range s.envelope.suite.Tools {
 			if i != j && toolID == dupeToolID {
@@ -105,9 +105,9 @@ func newSession(e *Envelope) (*Session, error) { //nolint:gocognit,gocyclo
 			}
 		}
 
-		//////////////////////////////////////
+		// ===================================
 		// tool init loop: parse, prep and get
-		//////////////////////////////////////
+		// ===================================
 
 		var (
 			hashTool  *hashtools.HashTool
@@ -135,9 +135,9 @@ func newSession(e *Envelope) (*Session, error) { //nolint:gocognit,gocyclo
 			s.toolsWithState = append(s.toolsWithState, logic)
 		}
 
-		////////////////////////////////////////////////////////////
+		// ===========================================================
 		// tool init loop: assign tools to queues and add requirements
-		////////////////////////////////////////////////////////////
+		// ===========================================================
 
 		switch tool.Info.Purpose {
 		case tools.PurposeKeyDerivation:
@@ -180,9 +180,9 @@ func newSession(e *Envelope) (*Session, error) { //nolint:gocognit,gocyclo
 			s.toolRequirements.Add(Integrity)
 		}
 
-		///////////////////////////////////////////////
+		// ============================================
 		// tool init loop: process options, get hashers
-		///////////////////////////////////////////////
+		// ============================================
 
 		for _, option := range tool.Info.Options {
 			switch option {
@@ -242,9 +242,9 @@ func newSession(e *Envelope) (*Session, error) { //nolint:gocognit,gocyclo
 			}
 		}
 
-		//////////////////////////////////
+		// ===============================
 		// tool init loop: initialize tool
-		//////////////////////////////////
+		// ===============================
 
 		// init tool
 		logic.Init(
@@ -257,18 +257,18 @@ func newSession(e *Envelope) (*Session, error) { //nolint:gocognit,gocyclo
 			hashSumFn,
 		)
 
-		/////////////////////////////////////////////////
+		// ==============================================
 		// tool init loop: calc and check security levels
-		/////////////////////////////////////////////////
+		// ==============================================
 
 		err = s.calcAndCheckSecurityLevel(logic, nil)
 		if err != nil {
 			return nil, err
 		}
 
-		/////////////////////////////////////////////
+		// ==========================================
 		// tool init loop: calculate default key size
-		/////////////////////////////////////////////
+		// ==========================================
 
 		// find biggest key size for default
 		if tool.Info.KeySize > s.DefaultSymmetricKeySize {
@@ -277,9 +277,9 @@ func newSession(e *Envelope) (*Session, error) { //nolint:gocognit,gocyclo
 
 	} // tool init loop: end
 
-	//////////////////////////////////////////////////////////
+	// =======================================================
 	// calc and check signet security levels, default key size
-	//////////////////////////////////////////////////////////
+	// =======================================================
 
 	for _, tool := range s.all {
 
@@ -342,9 +342,9 @@ func newSession(e *Envelope) (*Session, error) { //nolint:gocognit,gocyclo
 		return nil, err
 	}
 
-	/////////////////////////////////////////////////////////
+	// ======================================================
 	// check security level and default key size requirements
-	/////////////////////////////////////////////////////////
+	// ======================================================
 
 	// apply manual security level
 	if minimumSecurityLevel > 0 && minimumSecurityLevel > s.SecurityLevel {
@@ -364,9 +364,9 @@ func newSession(e *Envelope) (*Session, error) { //nolint:gocognit,gocyclo
 		return nil, fmt.Errorf("this toolset requires the default key size to be set manually")
 	}
 
-	///////////////
+	// ============
 	// final checks
-	///////////////
+	// ============
 
 	// check requirements requirements
 	if s.toolRequirements.Empty() {

@@ -26,7 +26,7 @@ func (w *WireSession) sendHandshakeAndInitKDF(letter *Letter) error {
 	case wireStateInit: // client
 		keyMaterial, err = w.session.setupClosingKeyMaterial(letter)
 		if err != nil {
-			return fmt.Errorf("failed to setup initial sending handshake key material: %s", err)
+			return fmt.Errorf("failed to setup initial sending handshake key material: %w", err)
 		}
 		fallthrough
 
@@ -34,12 +34,12 @@ func (w *WireSession) sendHandshakeAndInitKDF(letter *Letter) error {
 		if w.msgNo == 0 || (!w.server && w.reKeyNeeded()) {
 			err = w.generateLocalKeyExchangeSignets(letter)
 			if err != nil {
-				return fmt.Errorf("failed to generate local key exchange signets for initiating handshake: %s", err)
+				return fmt.Errorf("failed to generate local key exchange signets for initiating handshake: %w", err)
 			}
 
 			err = w.generateLocalKeyEncapsulationSignets(letter)
 			if err != nil {
-				return fmt.Errorf("failed to generate local key encapsulation signets for initiating handshake: %s", err)
+				return fmt.Errorf("failed to generate local key encapsulation signets for initiating handshake: %w", err)
 			}
 
 			w.handshakeState = wireStateAwaitKey
@@ -49,7 +49,7 @@ func (w *WireSession) sendHandshakeAndInitKDF(letter *Letter) error {
 
 		err = w.generateLocalKeyExchangeSignets(letter)
 		if err != nil {
-			return fmt.Errorf("failed to generate local key exchange signets for completing handshake: %s", err)
+			return fmt.Errorf("failed to generate local key exchange signets for completing handshake: %w", err)
 		}
 
 		// debugging:
@@ -67,17 +67,17 @@ func (w *WireSession) sendHandshakeAndInitKDF(letter *Letter) error {
 
 		keyMaterial, err = w.makeSharedKeys(keyMaterial)
 		if err != nil {
-			return fmt.Errorf("failed to create shared keys for completing handshake: %s", err)
+			return fmt.Errorf("failed to create shared keys for completing handshake: %w", err)
 		}
 
 		err = w.generateLocalKeyEncapsulationSignets(letter)
 		if err != nil {
-			return fmt.Errorf("failed to generate local key encapsulation signets for completing handshake: %s", err)
+			return fmt.Errorf("failed to generate local key encapsulation signets for completing handshake: %w", err)
 		}
 
 		keyMaterial, err = w.makeAndEncapsulateNewKeys(letter, keyMaterial)
 		if err != nil {
-			return fmt.Errorf("failed to encapsulate keys for completing handshake: %s", err)
+			return fmt.Errorf("failed to encapsulate keys for completing handshake: %w", err)
 		}
 
 		w.newKeyMaterial = copyKeyMaterial(keyMaterial)
@@ -102,13 +102,13 @@ func (w *WireSession) sendHandshakeAndInitKDF(letter *Letter) error {
 	// init KDF
 	err = w.session.kdf.InitKeyDerivation(letter.Nonce, keyMaterial...)
 	if err != nil {
-		return fmt.Errorf("failed to init %s kdf: %s", w.session.kdf.Info().Name, err)
+		return fmt.Errorf("failed to init %s kdf: %w", w.session.kdf.Info().Name, err)
 	}
 
 	// derive new carryover key
 	err = w.session.kdf.DeriveKeyWriteTo(w.sendKeyCarryover)
 	if err != nil {
-		return fmt.Errorf("failed to iterate session key with %s: %s", w.session.kdf.Info().Name, err)
+		return fmt.Errorf("failed to iterate session key with %s: %w", w.session.kdf.Info().Name, err)
 	}
 	if w.msgNo == 0 {
 		// copy initial sendkey to recvkey
@@ -137,7 +137,7 @@ func (w *WireSession) recvHandshakeAndInitKDF(letter *Letter) error {
 	case wireStateInit: // server
 		keyMaterial, err = w.session.setupOpeningKeyMaterial(letter)
 		if err != nil {
-			return fmt.Errorf("failed to setup initial receiving handshake key material: %s", err)
+			return fmt.Errorf("failed to setup initial receiving handshake key material: %w", err)
 		}
 		fallthrough
 
@@ -246,13 +246,13 @@ func (w *WireSession) recvHandshakeAndInitKDF(letter *Letter) error {
 	// init KDF
 	err = w.session.kdf.InitKeyDerivation(letter.Nonce, keyMaterial...)
 	if err != nil {
-		return fmt.Errorf("failed to init %s kdf: %s", w.session.kdf.Info().Name, err)
+		return fmt.Errorf("failed to init %s kdf: %w", w.session.kdf.Info().Name, err)
 	}
 
 	// derive new carryover key
 	err = w.session.kdf.DeriveKeyWriteTo(w.recvKeyCarryover)
 	if err != nil {
-		return fmt.Errorf("failed to iterate session key with %s: %s", w.session.kdf.Info().Name, err)
+		return fmt.Errorf("failed to iterate session key with %s: %w", w.session.kdf.Info().Name, err)
 	}
 	if w.msgNo == 0 {
 		// copy initial recvkey to sendkey
@@ -456,11 +456,11 @@ func (w *WireSession) burnEphemeralKeys() error {
 }
 
 func copyKeyMaterial(keyMaterial [][]byte) [][]byte {
-	new := make([][]byte, len(keyMaterial))
+	copied := make([][]byte, len(keyMaterial))
 	for index, part := range keyMaterial {
-		newPart := make([]byte, len(part))
-		copy(newPart, part)
-		new[index] = newPart
+		copiedPart := make([]byte, len(part))
+		copy(copiedPart, part)
+		copied[index] = copiedPart
 	}
-	return new
+	return copied
 }
