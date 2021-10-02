@@ -1,23 +1,40 @@
 linters:
   enable-all: true
   disable:
-    - lll
-    - gochecknoinits
-    - gochecknoglobals
+    - cyclop
+    - exhaustivestruct
+    - forbidigo
     - funlen
-    - whitespace
-    - wsl
-    - gomnd
-    - goerr113 
-    - testpackage
-    - nestif
+    - gochecknoglobals
+    - gochecknoinits
     - gocognit
-    - noctx
     - gocyclo
+    - goerr113 
+    - gomnd
+    - ifshort
+    - lll
+    - nestif
+    - nlreturn
+    - noctx
+    - revive
+    - testpackage
+    - whitespace
+    - wrapcheck
+    - wsl
 
 linters-settings:
+  gci:
+    # put imports beginning with prefix after 3rd-party packages;
+    # only support one prefix
+    # if not set, use goimports.local-prefixes
+    local-prefixes: github.com/safing
   godox:
     # report any comments starting with keywords, this is useful for TODO or FIXME comments that
     # might be left in the code accidentally and should be resolved before merging
     keywords:
       - FIXME
+  gosec:
+    # To specify a set of rules to explicitly exclude.
+    # Available rules: https://github.com/securego/gosec#available-rules
+    excludes:
+      - G505 # We need crypto/sha1 for the HIBP API.

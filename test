@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# config
+GOLANGCI_LINT_VERSION="1.42.1"
+
+# internal variables
 warnings=0
 errors=0
 scripted=0
@@ -123,8 +127,8 @@ if [[ $install -eq 1 ]]; then
   echo "$ go get -u golang.org/x/lint/golint"
   go get -u golang.org/x/lint/golint
   # TODO: update golangci-lint version regularly
-  echo "$ curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.24.0"
-  curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.24.0
+  echo "$ curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v${GOLANGCI_LINT_VERSION}"
+  curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v${GOLANGCI_LINT_VERSION}
   exit 0
 fi
 
@@ -146,11 +150,15 @@ if [[ $testonly -eq 0 ]]; then
   fi
   if [[ $(which golangci-lint) == "" ]]; then
     echo "golangci-lint command not found"
-    echo "install with: curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin vX.Y.Z"
+    echo "install with: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin vX.Y.Z"
     echo "don't forget to specify the version you want"
     echo "or run: ./test install"
     echo ""
     echo "alternatively, install the current dev version with: go get -u github.com/golangci/golangci-lint/cmd/golangci-lint"
+    exit 1
+  fi
+  if [[ $(golangci-lint --version | cut -d" " -f4) != "${GOLANGCI_LINT_VERSION}" ]]; then
+    echo "detected different golangci-lint version $(golangci-lint --version | cut -d" " -f4), expected configured version ${GOLANGCI_LINT_VERSION}, please fix your environment, possibly try: ./test install"
     exit 1
   fi
 fi
