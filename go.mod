@@ -17,5 +17,5 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/tevino/abool v1.2.0
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
-	golang.org/x/sys v0.0.0-20211001092434-39dca1131b70
+	golang.org/x/sys v0.0.0-20211002104244-808efd93c36d
 )
