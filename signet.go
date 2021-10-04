@@ -7,9 +7,9 @@ import (
 	"io"
 	"time"
 
-	"github.com/safing/jess/tools"
-
 	uuid "github.com/satori/go.uuid"
+
+	"github.com/safing/jess/tools"
 )
 
 // Special signet types.

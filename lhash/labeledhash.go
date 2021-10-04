@@ -36,12 +36,12 @@ func Load(labeledHash []byte) (*LabeledHash, error) {
 
 	algID, err := c.GetNextN64()
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse algorithm ID: %s", err)
+		return nil, fmt.Errorf("failed to parse algorithm ID: %w", err)
 	}
 
 	digest, err := c.GetNextBlock()
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse digest: %s", err)
+		return nil, fmt.Errorf("failed to parse digest: %w", err)
 	}
 
 	if c.Length() > 0 {
@@ -67,7 +67,7 @@ func Load(labeledHash []byte) (*LabeledHash, error) {
 func FromHex(hexEncoded string) (*LabeledHash, error) {
 	raw, err := hex.DecodeString(hexEncoded)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode hex: %s", err)
+		return nil, fmt.Errorf("failed to decode hex: %w", err)
 	}
 
 	return Load(raw)
@@ -78,7 +78,7 @@ func FromHex(hexEncoded string) (*LabeledHash, error) {
 func FromBase64(base64Encoded string) (*LabeledHash, error) {
 	raw, err := base64.RawURLEncoding.DecodeString(base64Encoded)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode base64: %s", err)
+		return nil, fmt.Errorf("failed to decode base64: %w", err)
 	}
 
 	return Load(raw)
@@ -89,7 +89,7 @@ func FromBase64(base64Encoded string) (*LabeledHash, error) {
 func FromBase58(base58Encoded string) (*LabeledHash, error) {
 	raw, err := base58.Decode(base58Encoded)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode base58: %s", err)
+		return nil, fmt.Errorf("failed to decode base58: %w", err)
 	}
 
 	return Load(raw)

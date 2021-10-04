@@ -9,6 +9,8 @@ import (
 )
 
 func TestWire(t *testing.T) {
+	t.Parallel()
+
 	wireReKeyAfterMsgs = 100
 
 	// current suites recommendation
@@ -21,6 +23,8 @@ func TestWire(t *testing.T) {
 }
 
 func testWireCorrespondence(t *testing.T, suite *Suite, testData string) {
+	t.Helper()
+
 	wtr := &wireTestRange{t: t}
 	wtr.init(suite, testData)
 	fmt.Printf("\n\nsimulating %v\n", suite.ID)

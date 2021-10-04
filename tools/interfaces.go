@@ -41,7 +41,7 @@ type SignetInt interface {
 	GetStoredKey() (key []byte, public bool)
 
 	// SetStoredKey sets a new stored key and whether it is public.
-	SetStoredKey(new []byte, public bool)
+	SetStoredKey(newKey []byte, public bool)
 
 	// PublicKey returns the public key.
 	PublicKey() crypto.PublicKey

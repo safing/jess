@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
+
 	"github.com/safing/jess"
 	"github.com/safing/jess/tools"
 )

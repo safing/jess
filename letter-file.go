@@ -3,9 +3,8 @@ package jess
 import (
 	"errors"
 
-	"github.com/safing/portbase/formats/dsd"
-
 	"github.com/safing/portbase/container"
+	"github.com/safing/portbase/formats/dsd"
 )
 
 /*

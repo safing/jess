@@ -51,7 +51,7 @@ type ToolLogic interface {
 
 	// DeriveKeyWriteTo derives a new key and writes it into the given slice.
 	// Must be overridden by tools that declare FeatureKeyDerivation.
-	DeriveKeyWriteTo(new []byte) error
+	DeriveKeyWriteTo(newKey []byte) error
 
 	// Key Exchanging
 
@@ -221,7 +221,7 @@ func (tlb *ToolLogicBase) DeriveKey(size int) ([]byte, error) {
 }
 
 // DeriveKeyWriteTo implements the ToolLogic interface.
-func (tlb *ToolLogicBase) DeriveKeyWriteTo(new []byte) error {
+func (tlb *ToolLogicBase) DeriveKeyWriteTo(newKey []byte) error {
 	return ErrNotImplemented
 }
 

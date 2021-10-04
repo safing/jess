@@ -3,9 +3,9 @@ package gostdlib
 import (
 	"crypto/cipher"
 
-	"github.com/safing/jess/tools"
-
 	"golang.org/x/crypto/chacha20poly1305"
+
+	"github.com/safing/jess/tools"
 )
 
 func init() {

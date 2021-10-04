@@ -1,17 +1,20 @@
+// Package lhash provides integrated labeled hashes.
+//
+//nolint:gci
 package lhash
 
 import (
 	"crypto"
 	"hash"
 
-	// register SHA2 in Go's internal registry
+	// Register SHA2 in Go's internal registry.
 	_ "crypto/sha256"
 	_ "crypto/sha512"
 
-	// register SHA3 in Go's internal registry
+	// Register SHA3 in Go's internal registry.
 	_ "golang.org/x/crypto/sha3"
 
-	// register BLAKE2 in Go's internal registry
+	// Register BLAKE2 in Go's internal registry.
 	_ "golang.org/x/crypto/blake2b"
 	_ "golang.org/x/crypto/blake2s"
 )

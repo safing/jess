@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"strings"
 	"text/tabwriter"
@@ -111,7 +112,7 @@ func formatSignetSecurityLevel(signet *jess.Signet) string {
 
 	securityLevel, err := tool.StaticLogic.SecurityLevel(signet)
 	if err != nil {
-		if err == tools.ErrProtected {
+		if errors.Is(err, tools.ErrProtected) {
 			return "[protected]"
 		}
 		return failPlaceholder

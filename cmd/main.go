@@ -5,15 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/safing/jess/truststores"
-
-	"github.com/safing/jess"
-
 	"github.com/spf13/cobra"
 
-	"github.com/safing/portbase/info"
-	// import all tools
+	"github.com/safing/jess"
 	_ "github.com/safing/jess/tools/all"
+	"github.com/safing/jess/truststores"
+	"github.com/safing/portbase/info"
 )
 
 const (

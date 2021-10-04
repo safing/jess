@@ -115,7 +115,7 @@ func (dts *DirTrustStore) SelectSignets(filter uint8, schemes ...string) ([]*jes
 				ID:     strings.Split(filepath.Base(path), ".")[0],
 				Public: strings.HasSuffix(path, recipientSuffix),
 			})
-			return nil
+			return err
 		}
 
 		// check signet scheme
@@ -139,7 +139,7 @@ func (dts *DirTrustStore) SelectSignets(filter uint8, schemes ...string) ([]*jes
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to access trust store entry: %s", err)
+		return nil, fmt.Errorf("failed to access trust store entry: %w", err)
 	}
 
 	return selection, nil
@@ -226,14 +226,14 @@ func (dts *DirTrustStore) AllEnvelopes() ([]*jess.Envelope, error) {
 				Name: fmt.Sprintf("%s [failed to load]",
 					strings.TrimSuffix(filepath.Base(path), envelopeSuffix)),
 			})
-			return nil
+			return err
 		}
 
 		all = append(all, envelope)
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to access trust store entry: %s", err)
+		return nil, fmt.Errorf("failed to access trust store entry: %w", err)
 	}
 
 	return all, nil
@@ -247,9 +247,9 @@ func NewDirTrustStore(storageDir string) (*DirTrustStore, error) {
 	info, err := os.Stat(cleanedPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("trust store does not exist: %s", err)
+			return nil, fmt.Errorf("trust store does not exist: %w", err)
 		}
-		return nil, fmt.Errorf("failed to access trust store: %s", err)
+		return nil, fmt.Errorf("failed to access trust store: %w", err)
 	}
 	if !info.IsDir() {
 		return nil, errors.New("truststore storage dir is a file, not a directory")

@@ -9,6 +9,8 @@ import (
 )
 
 func TestSerialization(t *testing.T) {
+	t.Parallel()
+
 	subject := &Letter{
 		Version: 1,
 		SuiteID: SuiteComplete,
@@ -36,6 +38,8 @@ func TestSerialization(t *testing.T) {
 }
 
 func testSerialize(t *testing.T, letter *Letter, wireFormat bool) { //nolint:unparam
+	t.Helper()
+
 	// File Format
 
 	fileData, err := letter.ToFileFormat()
@@ -85,10 +89,9 @@ func (letter *Letter) CheckEqual(other *Letter) error {
 	letterValue := reflect.ValueOf(*letter)
 	otherValue := reflect.ValueOf(*other)
 
+	var ok bool
 	numElements := letterValue.NumField()
 	for i := 0; i < numElements; i++ {
-		ok := false
-
 		name := letterValue.Type().Field(i).Name
 		switch name {
 		case "Data": // TODO: this required special handling in the past, leave it here for now.

@@ -6,11 +6,10 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/safing/portbase/container"
+	"github.com/spf13/cobra"
 
 	"github.com/safing/jess"
-
-	"github.com/spf13/cobra"
+	"github.com/safing/portbase/container"
 )
 
 func init() {

@@ -3,8 +3,9 @@ package gostdlib
 import (
 	"errors"
 
+	"golang.org/x/crypto/poly1305" //nolint:staticcheck,gci
+
 	"github.com/safing/jess/tools"
-	"golang.org/x/crypto/poly1305"
 )
 
 func init() {

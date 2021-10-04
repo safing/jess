@@ -46,6 +46,8 @@ var (
 )
 
 func tErrorf(t *testing.T, msg string, args ...interface{}) {
+	t.Helper()
+
 	t.Errorf(msg, args...)
 	if runTestsInDebugStyleActive {
 		debugStyleErrorCnt++
@@ -120,14 +122,17 @@ func init() {
 }
 
 func TestCoreBasic(t *testing.T) {
+	t.Parallel()
+
 	for _, suite := range Suites() {
 		testStorage(t, suite)
 	}
 }
 
-//nolint:gocognit
+// TestCoreAllCombinations tests all tools in all combinations and every tool
+// should be tested when placed before and after every other tool.
 func TestCoreAllCombinations(t *testing.T) {
-	// This shall test all tools in all combinations and every tool should be tested when placed before and after every other tool.
+	t.Parallel()
 
 	// skip in short tests and when not running comprehensive
 	if testing.Short() || !runComprehensiveTestsActive {
@@ -221,6 +226,8 @@ func TestCoreAllCombinations(t *testing.T) {
 }
 
 func testStorage(t *testing.T, suite *Suite) (detectedInvalid bool) {
+	t.Helper()
+
 	// t.Logf("testing storage with %s", suite.ID)
 
 	e, err := setupEnvelopeAndTrustStore(t, suite)
@@ -291,6 +298,8 @@ func testStorage(t *testing.T, suite *Suite) (detectedInvalid bool) {
 
 //nolint:gocognit,gocyclo
 func setupEnvelopeAndTrustStore(t *testing.T, suite *Suite) (*Envelope, error) {
+	t.Helper()
+
 	// check if suite is registered
 	if suite.ID == "" {
 		// register as test suite
@@ -456,6 +465,8 @@ func testInvalidToolset(e *Envelope, whyInvalid string) error {
 }
 
 func getOrMakeSignet(t *testing.T, tool tools.ToolLogic, recipient bool, signetID string) (*Signet, error) {
+	t.Helper()
+
 	// check if signet already exists
 	signet, err := testTrustStore.GetSignet(signetID, recipient)
 	if err == nil {
@@ -468,24 +479,24 @@ func getOrMakeSignet(t *testing.T, tool tools.ToolLogic, recipient bool, signetI
 	}
 
 	// create new signet
-	new := NewSignetBase(tool.Definition())
-	new.ID = signetID
+	newSignet := NewSignetBase(tool.Definition())
+	newSignet.ID = signetID
 	// generate signet and log time taken
 	start := time.Now()
-	err = tool.GenerateKey(new)
+	err = tool.GenerateKey(newSignet)
 	if err != nil {
 		return nil, err
 	}
-	t.Logf("generated %s signet %s in %s", new.Scheme, new.ID, time.Since(start))
+	t.Logf("generated %s signet %s in %s", newSignet.Scheme, newSignet.ID, time.Since(start))
 
 	// store signet
-	err = testTrustStore.StoreSignet(new)
+	err = testTrustStore.StoreSignet(newSignet)
 	if err != nil {
 		return nil, err
 	}
 
 	// store recipient
-	newRcpt, err := new.AsRecipient()
+	newRcpt, err := newSignet.AsRecipient()
 	if err != nil {
 		return nil, err
 	}
@@ -498,7 +509,7 @@ func getOrMakeSignet(t *testing.T, tool tools.ToolLogic, recipient bool, signetI
 	if recipient {
 		return newRcpt, nil
 	}
-	return new, nil
+	return newSignet, nil
 }
 
 // generateCombinations returns all possible combinations of the given []string slice.

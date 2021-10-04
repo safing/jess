@@ -3,7 +3,7 @@ package hashtools
 import (
 	"crypto"
 
-	// register BLAKE2 in Go's internal registry
+	// Register BLAKE2 in Go's internal registry.
 	_ "golang.org/x/crypto/blake2b"
 	_ "golang.org/x/crypto/blake2s"
 )

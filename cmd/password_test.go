@@ -6,6 +6,8 @@ import (
 
 //nolint:unused,deadcode // tested manually
 func testCfWP(t *testing.T, password string, expectedError string) {
+	t.Helper()
+
 	var errMsg string
 	err := checkForWeakPassword(password)
 	if err != nil {
@@ -17,7 +19,9 @@ func testCfWP(t *testing.T, password string, expectedError string) {
 }
 
 func TestCheckForWeakPassword(t *testing.T) {
-	// TODO: only run these manually, es they actually require the live HIBP API.
+	t.Parallel()
+
+	// TODO: only run these manually, as they actually require the live HIBP API.
 	// testCfWP(t, "asdfasdfasdf", "")
 	// testCfWP(t, "mfJLiQH9O9V9zXYrkNeYvGLvE14HcPyW7/sWWGfBX2nBU7c", "")
 }

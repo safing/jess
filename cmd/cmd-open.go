@@ -8,11 +8,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/safing/portbase/container"
+	"github.com/spf13/cobra"
 
 	"github.com/safing/jess"
-
-	"github.com/spf13/cobra"
+	"github.com/safing/portbase/container"
 )
 
 func init() {
@@ -73,7 +72,7 @@ var (
 						return nil
 					}
 				} else if !os.IsNotExist(err) {
-					return fmt.Errorf("failed to access output file: %s", err)
+					return fmt.Errorf("failed to access output file: %w", err)
 				}
 			}
 
@@ -105,7 +104,11 @@ var (
 			if outputFilename == "-" {
 				file = os.Stdout
 			} else {
-				file, err = os.OpenFile(outputFilename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+				file, err = os.OpenFile(
+					outputFilename,
+					os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
+					0644, //nolint:gofumpt // gofumpt is ignorant of octal numbers.
+				)
 				if err != nil {
 					return err
 				}

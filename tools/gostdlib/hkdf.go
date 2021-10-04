@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"io"
 
+	"golang.org/x/crypto/hkdf"
+
 	"github.com/safing/jess/tools"
 	"github.com/safing/portbase/container"
-
-	"golang.org/x/crypto/hkdf"
 )
 
 func init() {
@@ -56,12 +56,12 @@ func (keyder *HKDF) DeriveKey(size int) ([]byte, error) {
 }
 
 // DeriveKeyWriteTo implements the ToolLogic interface.
-func (keyder *HKDF) DeriveKeyWriteTo(new []byte) error {
-	n, err := io.ReadFull(keyder.reader, new)
+func (keyder *HKDF) DeriveKeyWriteTo(newKey []byte) error {
+	n, err := io.ReadFull(keyder.reader, newKey)
 	if err != nil {
-		return fmt.Errorf("failed to generate key: %s", err)
+		return fmt.Errorf("failed to generate key: %w", err)
 	}
-	if n != len(new) {
+	if n != len(newKey) {
 		return errors.New("failed to generate key: EOF")
 	}
 	return nil
