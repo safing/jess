@@ -11,5 +11,5 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/cobra v1.3.0
 	github.com/tevino/abool v1.2.0
-	golang.org/x/crypto v0.0.0-20220126173729-e04a8579fee6
+	golang.org/x/crypto v0.0.0-20220126234351-aa10faf2a1f8
 )
