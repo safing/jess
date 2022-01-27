@@ -7,7 +7,7 @@ require (
 	github.com/aead/ecdh v0.2.0
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
 	github.com/mr-tron/base58 v1.2.0
-	github.com/safing/portbase v0.13.2
+	github.com/safing/portbase v0.13.4
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/cobra v1.3.0
 	github.com/tevino/abool v1.2.0
