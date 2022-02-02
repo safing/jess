@@ -117,7 +117,9 @@ func checkForWeakPassword(pw string) error {
 	if err != nil {
 		return fmt.Errorf("failed to contact HIBP service: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	// check if password is in hash list
 	bodyReader := bufio.NewReader(resp.Body)

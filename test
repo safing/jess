@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# config
-GOLANGCI_LINT_VERSION="1.42.1"
-
-# internal variables
 warnings=0
 errors=0
 scripted=0
@@ -21,9 +17,9 @@ function help {
   echo "  install       install deps for running tests"
   echo ""
   echo "options:"
-  echo "  --scripted    dont jump console lines (still use colors)"
-  echo "  --test-only   don run linters only tests"
-  echo "  [package]     run tests only on this package"
+  echo "  --scripted    don't jump console lines (still use colors)"
+  echo "  --test-only   run tests only, no linters"
+  echo "  [package]     run only on this package"
 }
 
 function run {
@@ -64,22 +60,6 @@ function run {
   fi
 
   rm -f $tmpfile
-}
-
-function checkformat {
-  if [[ $scripted -eq 0 ]]; then
-    echo "[......] gofmt $1"
-  fi
-
-  output=$(gofmt -l $GOPATH/src/$1/*.go)
-  if [[ $output == "" ]]; then
-    echo -e "${goUp}[\e[01;32m  OK  \e[00m] gofmt $*"
-  else
-    echo -e "${goUp}[\e[01;31m FAIL \e[00m] gofmt $*"
-    echo "The following files do not conform to gofmt:"
-    gofmt -l $GOPATH/src/$1/*.go # keeps format
-    errors=$((errors+1))
-  fi
 }
 
 # get and switch to script dir
@@ -124,11 +104,9 @@ fi
 # install
 if [[ $install -eq 1 ]]; then
   echo "installing dependencies..."
-  echo "$ go get -u golang.org/x/lint/golint"
-  go get -u golang.org/x/lint/golint
   # TODO: update golangci-lint version regularly
-  echo "$ curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v${GOLANGCI_LINT_VERSION}"
-  curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v${GOLANGCI_LINT_VERSION}
+  echo "$ curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.44.0"
+  curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.44.0
   exit 0
 fi
 
@@ -142,23 +120,13 @@ if [[ $testonly -eq 0 ]]; then
     echo "gofmt command not found"
     exit 1
   fi
-  if [[ $(which golint) == "" ]]; then
-    echo "golint command not found"
-    echo "install with: go get -u golang.org/x/lint/golint"
-    echo "or run: ./test install"
-    exit 1
-  fi
   if [[ $(which golangci-lint) == "" ]]; then
     echo "golangci-lint command not found"
-    echo "install with: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin vX.Y.Z"
+    echo "install with: curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin vX.Y.Z"
     echo "don't forget to specify the version you want"
     echo "or run: ./test install"
     echo ""
     echo "alternatively, install the current dev version with: go get -u github.com/golangci/golangci-lint/cmd/golangci-lint"
-    exit 1
-  fi
-  if [[ $(golangci-lint --version | cut -d" " -f4) != "${GOLANGCI_LINT_VERSION}" ]]; then
-    echo "detected different golangci-lint version $(golangci-lint --version | cut -d" " -f4), expected configured version ${GOLANGCI_LINT_VERSION}, please fix your environment, possibly try: ./test install"
     exit 1
   fi
 fi
@@ -184,8 +152,6 @@ for package in $packages; do
   echo ""
   echo $package
   if [[ $testonly -eq 0 ]]; then
-    checkformat $package
-    run golint -set_exit_status -min_confidence 1.0 $package
     run go vet $package
     run golangci-lint run $packagename
   fi

@@ -27,7 +27,7 @@ func WriteSignetToFile(signet *jess.Signet, filename string) error {
 	}
 
 	// write
-	err = ioutil.WriteFile(filename, data, 0600) //nolint:gofumpt // gofumpt is ignorant of octal numbers.
+	err = ioutil.WriteFile(filename, data, 0o0600)
 	if err != nil {
 		return err
 	}

@@ -107,7 +107,7 @@ var (
 				file, err = os.OpenFile(
 					outputFilename,
 					os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
-					0644, //nolint:gofumpt // gofumpt is ignorant of octal numbers.
+					0o0600,
 				)
 				if err != nil {
 					return err
@@ -117,11 +117,11 @@ var (
 			// write
 			n, err := file.Write(plainText)
 			if err != nil {
-				file.Close()
+				_ = file.Close()
 				return err
 			}
 			if n < len(plainText) {
-				file.Close()
+				_ = file.Close()
 				return io.ErrShortWrite
 			}
 			return file.Close()
