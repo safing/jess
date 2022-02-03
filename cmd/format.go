@@ -24,7 +24,7 @@ func formatColumns(table [][]string) []string {
 		}
 		fmt.Fprint(tabWriter, strings.Join(table[i], "\t"))
 	}
-	tabWriter.Flush()
+	_ = tabWriter.Flush()
 
 	// parse to []string
 	var lines []string

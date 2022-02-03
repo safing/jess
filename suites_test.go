@@ -97,7 +97,7 @@ func TestSuites(t *testing.T) {
 	}
 }
 
-func suiteBullshitCheck(suite *Suite) error { //nolint:gocognit,gocyclo
+func suiteBullshitCheck(suite *Suite) error { //nolint:maintidx
 	// pre checks
 	if suite.Provides == nil {
 		return errors.New("provides no requirement attributes")

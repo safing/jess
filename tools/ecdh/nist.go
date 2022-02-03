@@ -125,7 +125,11 @@ func (ec *NistCurve) StoreKey(signet tools.SignetInt) error {
 
 	// store private key
 	if !public {
-		c.Append(privKey.([]byte))
+		privKeyData, ok := privKey.([]byte)
+		if !ok {
+			return fmt.Errorf("private key of invalid type %T", privKey)
+		}
+		c.Append(privKeyData)
 	}
 
 	signet.SetStoredKey(c.CompileData(), public)

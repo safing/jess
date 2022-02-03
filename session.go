@@ -56,7 +56,7 @@ func (sh *managedHasher) Sum() ([]byte, error) {
 	return sh.hash.Sum(nil), nil
 }
 
-func newSession(e *Envelope) (*Session, error) { //nolint:gocognit,gocyclo
+func newSession(e *Envelope) (*Session, error) { //nolint:maintidx
 	if e.suite == nil {
 		return nil, errors.New("suite not loaded")
 	}
