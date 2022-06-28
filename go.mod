@@ -8,7 +8,7 @@ require (
 	github.com/fxamacker/cbor/v2 v2.4.0 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
 	github.com/mr-tron/base58 v1.2.0
-	github.com/safing/portbase v0.14.4
+	github.com/safing/portbase v0.14.5
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/cobra v1.5.0
 	github.com/tevino/abool v1.2.0
