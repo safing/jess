@@ -7,9 +7,11 @@ import (
 	"io"
 	"time"
 
+	"github.com/mr-tron/base58"
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/safing/jess/tools"
+	"github.com/safing/portbase/formats/dsd"
 )
 
 // Special signet types.
@@ -248,4 +250,61 @@ func (signet *Signet) AssignUUID() error {
 	u.SetVariant(uuid.VariantRFC4122)
 	signet.ID = u.String()
 	return nil
+}
+
+// ToBytes serializes the Signet to a byte slice.
+func (signet *Signet) ToBytes() ([]byte, error) {
+	// Make sure the key is stored in the serializable format.
+	if err := signet.StoreKey(); err != nil {
+		return nil, fmt.Errorf("failed to serialize the key: %w", err)
+	}
+
+	// Serialize Signet.
+	data, err := dsd.Dump(signet, dsd.CBOR)
+	if err != nil {
+		return nil, fmt.Errorf("failed to serialize the signet: %w", err)
+	}
+
+	return data, nil
+}
+
+// SignetFromBytes parses and loads a serialized signet.
+func SignetFromBytes(data []byte) (*Signet, error) {
+	signet := &Signet{}
+
+	// Parse Signet from data.
+	if _, err := dsd.Load(data, signet); err != nil {
+		return nil, fmt.Errorf("failed to parse data format: %w", err)
+	}
+
+	// Load the key.
+	if err := signet.LoadKey(); err != nil {
+		return nil, fmt.Errorf("failed to parse key: %w", err)
+	}
+
+	return signet, nil
+}
+
+// ToBase58 serializes the signet and encodes it with base58.
+func (signet *Signet) ToBase58() (string, error) {
+	// Serialize Signet.
+	data, err := signet.ToBytes()
+	if err != nil {
+		return "", err
+	}
+
+	// Encode and return.
+	return base58.Encode(data), nil
+}
+
+// SignetFromBase58 parses and loads a base58 encoded serialized signet.
+func SignetFromBase58(base58Encoded string) (*Signet, error) {
+	// Decode string.
+	data, err := base58.Decode(base58Encoded)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode base58: %w", err)
+	}
+
+	// Parse and return.
+	return SignetFromBytes(data)
 }
