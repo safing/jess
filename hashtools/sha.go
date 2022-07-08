@@ -2,13 +2,14 @@ package hashtools
 
 import (
 	"crypto"
-
 	// Register SHA2 in Go's internal registry.
 	_ "crypto/sha256"
 	_ "crypto/sha512"
 
 	// Register SHA3 in Go's internal registry.
 	_ "golang.org/x/crypto/sha3"
+
+	"github.com/safing/jess/lhash"
 )
 
 func init() {
@@ -24,6 +25,7 @@ func init() {
 		BlockSize:     crypto.SHA224.New().BlockSize(),
 		SecurityLevel: 112,
 		Author:        "NSA, 2004",
+		labeledAlg:    lhash.SHA2_224,
 	}))
 	Register(sha2Base.With(&HashTool{
 		Name:          "SHA2-256",
@@ -31,6 +33,7 @@ func init() {
 		DigestSize:    crypto.SHA256.Size(),
 		BlockSize:     crypto.SHA256.New().BlockSize(),
 		SecurityLevel: 128,
+		labeledAlg:    lhash.SHA2_256,
 	}))
 	Register(sha2Base.With(&HashTool{
 		Name:          "SHA2-384",
@@ -38,6 +41,7 @@ func init() {
 		DigestSize:    crypto.SHA384.Size(),
 		BlockSize:     crypto.SHA384.New().BlockSize(),
 		SecurityLevel: 192,
+		labeledAlg:    lhash.SHA2_384,
 	}))
 	Register(sha2Base.With(&HashTool{
 		Name:          "SHA2-512",
@@ -45,6 +49,7 @@ func init() {
 		DigestSize:    crypto.SHA512.Size(),
 		BlockSize:     crypto.SHA512.New().BlockSize(),
 		SecurityLevel: 256,
+		labeledAlg:    lhash.SHA2_512,
 	}))
 	Register(sha2Base.With(&HashTool{
 		Name:          "SHA2-512-224",
@@ -52,6 +57,7 @@ func init() {
 		DigestSize:    crypto.SHA512_224.Size(),
 		BlockSize:     crypto.SHA512_224.New().BlockSize(),
 		SecurityLevel: 112,
+		labeledAlg:    lhash.SHA2_512_224,
 	}))
 	Register(sha2Base.With(&HashTool{
 		Name:          "SHA2-512-256",
@@ -59,6 +65,7 @@ func init() {
 		DigestSize:    crypto.SHA512_256.Size(),
 		BlockSize:     crypto.SHA512_256.New().BlockSize(),
 		SecurityLevel: 128,
+		labeledAlg:    lhash.SHA2_512_256,
 	}))
 
 	// SHA3
@@ -72,6 +79,7 @@ func init() {
 		DigestSize:    crypto.SHA3_224.Size(),
 		BlockSize:     crypto.SHA3_224.New().BlockSize(),
 		SecurityLevel: 112,
+		labeledAlg:    lhash.SHA3_224,
 	}))
 	Register(sha3Base.With(&HashTool{
 		Name:          "SHA3-256",
@@ -79,6 +87,7 @@ func init() {
 		DigestSize:    crypto.SHA3_256.Size(),
 		BlockSize:     crypto.SHA3_256.New().BlockSize(),
 		SecurityLevel: 128,
+		labeledAlg:    lhash.SHA3_256,
 	}))
 	Register(sha3Base.With(&HashTool{
 		Name:          "SHA3-384",
@@ -86,6 +95,7 @@ func init() {
 		DigestSize:    crypto.SHA3_384.Size(),
 		BlockSize:     crypto.SHA3_384.New().BlockSize(),
 		SecurityLevel: 192,
+		labeledAlg:    lhash.SHA3_384,
 	}))
 	Register(sha3Base.With(&HashTool{
 		Name:          "SHA3-512",
@@ -93,5 +103,6 @@ func init() {
 		DigestSize:    crypto.SHA3_512.Size(),
 		BlockSize:     crypto.SHA3_512.New().BlockSize(),
 		SecurityLevel: 256,
+		labeledAlg:    lhash.SHA3_512,
 	}))
 }
