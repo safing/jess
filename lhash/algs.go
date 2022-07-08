@@ -6,6 +6,7 @@ package lhash
 import (
 	"crypto"
 	"hash"
+	"io"
 
 	// Register SHA2 in Go's internal registry.
 	_ "crypto/sha256"
@@ -82,4 +83,19 @@ func (a Algorithm) new() hash.Hash {
 	default:
 		return nil
 	}
+}
+
+// Digest creates a new labeled hash and digests the given data.
+func (a Algorithm) Digest(data []byte) *LabeledHash {
+	return Digest(a, data)
+}
+
+// DigestFile creates a new labeled hash and digests the given file.
+func (a Algorithm) DigestFile(pathToFile string) (*LabeledHash, error) {
+	return DigestFile(a, pathToFile)
+}
+
+// DigestFromReader creates a new labeled hash and digests from the given reader.
+func (a Algorithm) DigestFromReader(alg Algorithm, reader io.Reader) (*LabeledHash, error) {
+	return DigestFromReader(a, reader)
 }
