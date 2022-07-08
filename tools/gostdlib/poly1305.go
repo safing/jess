@@ -3,7 +3,7 @@ package gostdlib
 import (
 	"errors"
 
-	"golang.org/x/crypto/poly1305" //nolint:staticcheck,gci
+	"golang.org/x/crypto/poly1305" //nolint:staticcheck // TODO: replace with newer package
 
 	"github.com/safing/jess/tools"
 )

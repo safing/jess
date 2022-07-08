@@ -1,6 +1,4 @@
 // Package all imports all tool subpackages
-//
-//nolint:gci
 package all
 
 import (
