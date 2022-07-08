@@ -378,6 +378,7 @@ func setupEnvelopeAndTrustStore(t *testing.T, suite *Suite) (*Envelope, error) {
 		case tools.PurposeKeyEncapsulation:
 			e.suite.Provides.Add(RecipientAuthentication)
 		case tools.PurposeSigning:
+			e.suite.Provides.Add(Integrity)
 			e.suite.Provides.Add(SenderAuthentication)
 		case tools.PurposeIntegratedCipher:
 			e.suite.Provides.Add(Confidentiality)

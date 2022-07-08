@@ -164,6 +164,7 @@ func newSession(e *Envelope) (*Session, error) { //nolint:maintidx
 
 		case tools.PurposeSigning:
 			s.signers = append(s.signers, logic)
+			s.toolRequirements.Add(Integrity)
 			s.toolRequirements.Add(SenderAuthentication)
 
 		case tools.PurposeIntegratedCipher:
