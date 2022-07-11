@@ -21,12 +21,18 @@ type FileData struct {
 	SignedAt time.Time
 	MetaData map[string]string
 
+	signature         *jess.Letter
 	verificationError error
 }
 
 // FileHash returns the labeled hash of the file that was signed.
 func (fd *FileData) FileHash() *lhash.LabeledHash {
 	return fd.fileHash
+}
+
+// Signature returns the signature, if present.
+func (fd *FileData) Signature() *jess.Letter {
+	return fd.signature
 }
 
 // VerificationError returns the error encountered during verification.
@@ -75,7 +81,9 @@ func SignFileData(fileHash *lhash.LabeledHash, metaData map[string]string, envel
 // Any returned file data struct must be checked for an verification error.
 func VerifyFileData(letter *jess.Letter, requiredMetaData map[string]string, trustStore jess.TrustStore) (fd *FileData, err error) {
 	// Parse data.
-	fd = &FileData{}
+	fd = &FileData{
+		signature: letter,
+	}
 	_, err = dsd.Load(letter.Data, fd)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse file signature data: %w", err)
