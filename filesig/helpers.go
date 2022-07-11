@@ -51,14 +51,27 @@ func SignFile(dataFilePath, signatureFilePath string, metaData map[string]string
 		return nil, fmt.Errorf("failed to sign file: %w", err)
 	}
 
-	// Make signature section for saving to disk.
-	signatureSection, err := MakeSigFileSection(signature)
-	if err != nil {
-		return nil, fmt.Errorf("failed to format signature for file: %w", err)
+	sigFileData, err := ioutil.ReadFile(signatureFilePath)
+	var newSigFileData []byte
+	switch {
+	case err == nil:
+		// Add signature to existing file.
+		newSigFileData, err = AddToSigFile(signature, sigFileData, true)
+		if err != nil {
+			return nil, fmt.Errorf("failed to add signature to file: %w", err)
+		}
+	case os.IsNotExist(err):
+		// Make signature section for saving to disk.
+		newSigFileData, err = MakeSigFileSection(signature)
+		if err != nil {
+			return nil, fmt.Errorf("failed to format signature for file: %w", err)
+		}
+	default:
+		return nil, fmt.Errorf("failed to open existing signature file: %w", err)
 	}
 
 	// Write the signature to file.
-	if err := ioutil.WriteFile(signatureFilePath, signatureSection, 0o0644); err != nil { //nolint:gosec
+	if err := ioutil.WriteFile(signatureFilePath, newSigFileData, 0o0644); err != nil { //nolint:gosec
 		return nil, fmt.Errorf("failed to write signature to file: %w", err)
 	}
 
