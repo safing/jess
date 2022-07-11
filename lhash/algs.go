@@ -85,6 +85,48 @@ func (a Algorithm) new() hash.Hash {
 	}
 }
 
+func (a Algorithm) String() string {
+	switch a {
+
+	// SHA2
+	case SHA2_224:
+		return "SHA2_224"
+	case SHA2_256:
+		return "SHA2_256"
+	case SHA2_384:
+		return "SHA2_384"
+	case SHA2_512:
+		return "SHA2_512"
+	case SHA2_512_224:
+		return "SHA2_512_224"
+	case SHA2_512_256:
+		return "SHA2_512_256"
+
+	// SHA3
+	case SHA3_224:
+		return "SHA3_224"
+	case SHA3_256:
+		return "SHA3_256"
+	case SHA3_384:
+		return "SHA3_384"
+	case SHA3_512:
+		return "SHA3_512"
+
+	// BLAKE2
+	case BLAKE2s_256:
+		return "BLAKE2s_256"
+	case BLAKE2b_256:
+		return "BLAKE2b_256"
+	case BLAKE2b_384:
+		return "BLAKE2b_384"
+	case BLAKE2b_512:
+		return "BLAKE2b_512"
+
+	default:
+		return "unknown"
+	}
+}
+
 // Digest creates a new labeled hash and digests the given data.
 func (a Algorithm) Digest(data []byte) *LabeledHash {
 	return Digest(a, data)
@@ -96,6 +138,6 @@ func (a Algorithm) DigestFile(pathToFile string) (*LabeledHash, error) {
 }
 
 // DigestFromReader creates a new labeled hash and digests from the given reader.
-func (a Algorithm) DigestFromReader(alg Algorithm, reader io.Reader) (*LabeledHash, error) {
+func (a Algorithm) DigestFromReader(reader io.Reader) (*LabeledHash, error) {
 	return DigestFromReader(a, reader)
 }
