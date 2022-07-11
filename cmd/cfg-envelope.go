@@ -55,7 +55,7 @@ func newEnvelope(name string) (*jess.Envelope, error) {
 		envelope.SuiteID = jess.SuiteRcptOnly
 		err = selectSignets(envelope, "recipient")
 	case "Sign a file":
-		envelope.SuiteID = jess.SuiteSign
+		envelope.SuiteID = jess.SuiteSignFileV1
 		err = selectSignets(envelope, "sender")
 	}
 	if err != nil {
@@ -105,7 +105,20 @@ func editEnvelope(envelope *jess.Envelope) error {
 
 		switch {
 		case strings.HasPrefix(submenu, "Done"):
-			// save
+			// Check if the envolope is valid.
+			if envelope.SecurityLevel == 0 {
+				fmt.Println("Envelope is invalid, please fix before saving.")
+				continue
+			}
+			// Remove and keys and save.
+			_ = envelope.LoopSecrets("", func(signet *jess.Signet) error {
+				signet.Key = nil
+				return nil
+			})
+			_ = envelope.LoopSenders("", func(signet *jess.Signet) error {
+				signet.Key = nil
+				return nil
+			})
 			return trustStore.StoreEnvelope(envelope)
 		case strings.HasPrefix(submenu, "Abort"):
 			return nil
