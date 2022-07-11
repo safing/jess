@@ -14,6 +14,10 @@ import (
 )
 
 const (
+	stdInOutFilename    = "-"
+	letterFileExtension = ".letter"
+	sigFileExtension    = ".sig"
+
 	warnFileSize = 12000000 // 120MB
 )
 
@@ -33,7 +37,7 @@ var (
 	defaultSymmetricKeySize = 0
 
 	trustStore   truststores.ExtendedTrustStore
-	requirements = jess.NewRequirements()
+	requirements *jess.Requirements
 )
 
 func main() {
@@ -74,7 +78,6 @@ func initGlobalFlags(cmd *cobra.Command, args []string) (err error) {
 			return err
 		}
 	}
-
 	// requirements
 	if noSpec != "" {
 		requirements, err = jess.ParseRequirementsFromNoSpec(noSpec)

@@ -93,6 +93,11 @@ var (
 				return err
 			}
 
+			// Create default requirements if not set.
+			if requirements == nil {
+				requirements = jess.NewRequirements()
+			}
+
 			// decrypt (and verify)
 			plainText, err := letter.Open(requirements, trustStore)
 			if err != nil {
