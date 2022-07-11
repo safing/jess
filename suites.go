@@ -39,6 +39,15 @@ var (
 		SecurityLevel: 128,
 		Status:        SuiteStatusRecommended,
 	})
+	// SuiteSignFileV1 is a cipher suite for signing files (no encryption).
+	// SHA2_256 is chosen for better compatibility with other tool sets and workflows.
+	SuiteSignFileV1 = registerSuite(&Suite{
+		ID:            "signfile_v1",
+		Tools:         []string{"Ed25519(SHA2-256)"},
+		Provides:      newEmptyRequirements().Add(Integrity).Add(SenderAuthentication),
+		SecurityLevel: 128,
+		Status:        SuiteStatusRecommended,
+	})
 	// SuiteCompleteV1 is a cipher suite for both encrypting for someone and signing.
 	SuiteCompleteV1 = registerSuite(&Suite{
 		ID:            "v1",
@@ -66,6 +75,8 @@ var (
 	SuiteRcptOnly = SuiteRcptOnlyV1
 	// SuiteSign is a a cipher suite for signing (no encryption).
 	SuiteSign = SuiteSignV1
+	// SuiteSignFile is a a cipher suite for signing files (no encryption).
+	SuiteSignFile = SuiteSignFileV1
 	// SuiteComplete is a a cipher suite for both encrypting for someone and signing.
 	SuiteComplete = SuiteCompleteV1
 	// SuiteWire is a a cipher suite for network communication, including authentication of the server, but not the client.
