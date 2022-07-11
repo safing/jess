@@ -1,4 +1,4 @@
-package jess
+package filesig
 
 import (
 	"bytes"
