@@ -4,13 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/safing/jess"
 	"github.com/safing/jess/hashtools"
+	"github.com/safing/jess/lhash"
 )
 
 // SignFile signs a file and replaces the signature file with a new one.
+// If the dataFilePath is "-", the file data is read from stdin.
+// Existing jess signatures in the signature file are removed.
 func SignFile(dataFilePath, signatureFilePath string, metaData map[string]string, envelope *jess.Envelope, trustStore jess.TrustStore) (fileData *FileData, err error) {
 	// Load encryption suite.
 	if err := envelope.LoadSuite(); err != nil {
@@ -21,7 +25,7 @@ func SignFile(dataFilePath, signatureFilePath string, metaData map[string]string
 	var hashTool *hashtools.HashTool
 	for _, toolID := range envelope.Suite().Tools {
 		if strings.Contains(toolID, "(") {
-			hashToolID := strings.Trim(strings.Split(toolID, "(")[0], "()")
+			hashToolID := strings.Trim(strings.Split(toolID, "(")[1], "()")
 			hashTool, _ = hashtools.Get(hashToolID)
 			break
 		}
@@ -31,7 +35,12 @@ func SignFile(dataFilePath, signatureFilePath string, metaData map[string]string
 	}
 
 	// Hash the data file.
-	fileHash, err := hashTool.LabeledHasher().DigestFile(dataFilePath)
+	var fileHash *lhash.LabeledHash
+	if dataFilePath == "-" {
+		fileHash, err = hashTool.LabeledHasher().DigestFromReader(os.Stdin)
+	} else {
+		fileHash, err = hashTool.LabeledHasher().DigestFile(dataFilePath)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to hash file: %w", err)
 	}
@@ -57,6 +66,7 @@ func SignFile(dataFilePath, signatureFilePath string, metaData map[string]string
 }
 
 // VerifyFile verifies the given files and returns the verified file data.
+// If the dataFilePath is "-", the file data is read from stdin.
 // If an error is returned, there was an error in at least some part of the process.
 // Any returned file data struct must be checked for an verification error.
 func VerifyFile(dataFilePath, signatureFilePath string, metaData map[string]string, trustStore jess.TrustStore) (verifiedFileData []*FileData, err error) {
@@ -95,7 +105,12 @@ func VerifyFile(dataFilePath, signatureFilePath string, metaData map[string]stri
 		}
 
 		// Hash the file.
-		fileHash, err := fileData.FileHash().Algorithm().DigestFile(dataFilePath)
+		var fileHash *lhash.LabeledHash
+		if dataFilePath == "-" {
+			fileHash, err = fileData.FileHash().Algorithm().DigestFromReader(os.Stdin)
+		} else {
+			fileHash, err = fileData.FileHash().Algorithm().DigestFile(dataFilePath)
+		}
 		if err != nil {
 			lastErr = err
 			fileData.verificationError = err
