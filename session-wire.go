@@ -17,7 +17,10 @@ const (
 )
 
 var (
-	wireReKeyAfterMsgs uint64 = 100000 // re-exchange keys every 100000 messages
+	// Re-exchange keys every x messages.
+	// At 10_000_000 msgs with 1500 bytes per msg, this would result in
+	// re-exchanging keys every 15 GB.
+	wireReKeyAfterMsgs uint64 = 10_000_000
 
 	requiredWireSessionRequirements = NewRequirements().Remove(SenderAuthentication)
 )
