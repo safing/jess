@@ -136,6 +136,14 @@ func (signet *Signet) SetLoadedKeys(pubKey crypto.PublicKey, privKey crypto.Priv
 
 // AsRecipient returns a public version of the Signet.
 func (signet *Signet) AsRecipient() (*Signet, error) {
+	// Check special signet schemes.
+	switch signet.Scheme {
+	case SignetSchemeKey:
+		return nil, errors.New("keys cannot be a recipient")
+	case SignetSchemePassword:
+		return nil, errors.New("passwords cannot be a recipient")
+	}
+
 	// load so we can split keys
 	err := signet.LoadKey()
 	if err != nil {

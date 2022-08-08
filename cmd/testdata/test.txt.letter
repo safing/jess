@@ -1,0 +1,13 @@
+‘J{
+	"Version": 1,
+	"SuiteID": "signfile_v1",
+	"Nonce": "pKOQBQ==",
+	"Signatures": [
+		{
+			"Scheme": "Ed25519",
+			"ID": "3911c84c-78f7-4354-a7f5-0e115aa2903c",
+			"Value": "ftsIINZ9oApKiXYQTcLIdAZDSflp6nRN/y8Gm0rdQC+3/wal6Q+7N3N8HEAxpoxWseSQNaRVCT9hSnRQStHYBA=="
+		}
+	]
+}
+hello world!
