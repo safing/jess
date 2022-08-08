@@ -32,6 +32,7 @@ var (
 	}
 
 	trustStoreDir           string
+	trustStoreKeyring       string
 	noSpec                  string
 	minimumSecurityLevel    = 0
 	defaultSymmetricKeySize = 0
@@ -50,7 +51,10 @@ func main() {
 	}
 
 	rootCmd.PersistentFlags().StringVarP(&trustStoreDir, "tsdir", "d", "",
-		"specify a truststore directory (default loaded from JESS_TSDIR env variable)",
+		"specify a truststore directory (default loaded from JESS_TS_DIR env variable)",
+	)
+	rootCmd.PersistentFlags().StringVarP(&trustStoreDir, "tskeyring", "k", "",
+		"specify a truststore keyring namespace (default loaded from JESS_TS_KEYRING env variable) - lower priority than tsdir",
 	)
 	rootCmd.PersistentFlags().StringVarP(&noSpec, "no", "n", "",
 		"remove requirements using the abbreviations C, I, R, S",
@@ -67,17 +71,36 @@ func main() {
 }
 
 func initGlobalFlags(cmd *cobra.Command, args []string) (err error) {
-	// trust store
+	// trust store directory
 	if trustStoreDir == "" {
-		trustStoreDir, _ = os.LookupEnv("JESS_TSDIR")
+		trustStoreDir, _ = os.LookupEnv("JESS_TS_DIR")
+		if trustStoreDir == "" {
+			trustStoreDir, _ = os.LookupEnv("JESS_TSDIR")
+		}
 	}
 	if trustStoreDir != "" {
-		var err error
 		trustStore, err = truststores.NewDirTrustStore(trustStoreDir)
 		if err != nil {
 			return err
 		}
 	}
+
+	// trust store keyring
+	if trustStore == nil {
+		if trustStoreKeyring == "" {
+			trustStoreKeyring, _ = os.LookupEnv("JESS_TS_KEYRING")
+			if trustStoreKeyring == "" {
+				trustStoreKeyring, _ = os.LookupEnv("JESS_TSKEYRING")
+			}
+		}
+		if trustStoreKeyring != "" {
+			trustStore, err = truststores.NewKeyringTrustStore(trustStoreKeyring)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	// requirements
 	if noSpec != "" {
 		requirements, err = jess.ParseRequirementsFromNoSpec(noSpec)
