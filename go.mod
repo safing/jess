@@ -12,6 +12,7 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/cobra v1.5.0
 	github.com/tevino/abool v1.2.0
+	github.com/zalando/go-keyring v0.2.1 // indirect
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 )
