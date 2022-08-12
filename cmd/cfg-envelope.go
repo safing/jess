@@ -31,6 +31,7 @@ func newEnvelope(name string) (*jess.Envelope, error) {
 			"Encrypt for someone and sign",
 			"Encrypt for someone but don't sign",
 			"Sign a file (wrapped)",
+			"Sign a file (separate sig)",
 		},
 	}
 	err := survey.AskOne(prompt, &preset, nil)
@@ -54,8 +55,11 @@ func newEnvelope(name string) (*jess.Envelope, error) {
 	case "Encrypt for someone but don't sign":
 		envelope.SuiteID = jess.SuiteRcptOnly
 		err = selectSignets(envelope, "recipient")
-	case "Sign a file":
-		envelope.SuiteID = jess.SuiteSignFileV1
+	case "Sign a file (wrapped)":
+		envelope.SuiteID = jess.SuiteSign
+		err = selectSignets(envelope, "sender")
+	case "Sign a file (separate sig)":
+		envelope.SuiteID = jess.SuiteSignFile
 		err = selectSignets(envelope, "sender")
 	}
 	if err != nil {
