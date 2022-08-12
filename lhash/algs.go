@@ -127,6 +127,11 @@ func (a Algorithm) String() string {
 	}
 }
 
+// RawHasher returns a new raw hasher of the algorithm.
+func (a Algorithm) RawHasher() hash.Hash {
+	return a.new()
+}
+
 // Digest creates a new labeled hash and digests the given data.
 func (a Algorithm) Digest(data []byte) *LabeledHash {
 	return Digest(a, data)

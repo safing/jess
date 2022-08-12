@@ -168,6 +168,13 @@ func (lh *LabeledHash) Equal(other *LabeledHash) bool {
 		subtle.ConstantTimeCompare(lh.digest, other.digest) == 1
 }
 
+// EqualRaw returns true if the given raw hash digest is equal.
+// Equality is checked by comparing both the digest value only.
+// The caller must make sure the same algorithm is used.
+func (lh *LabeledHash) EqualRaw(otherDigest []byte) bool {
+	return subtle.ConstantTimeCompare(lh.digest, otherDigest) == 1
+}
+
 // MatchesString returns true if the digest of the given string matches the hash.
 func (lh *LabeledHash) MatchesString(s string) bool {
 	return lh.MatchesData([]byte(s))
