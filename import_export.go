@@ -182,11 +182,13 @@ func EnvelopeFromTextFormat(textFormat string) (*Envelope, error) {
 	return EnvelopeFromBase58(splitted[len(splitted)-1])
 }
 
-var replaceForTextFormatMatcher = regexp.MustCompile(`[^A-Za-z\-]+`)
+var replaceForTextFormatMatcher = regexp.MustCompile(`[^A-Za-z0-9]+`)
 
 // toTextFormatString makes a string compatible with the text format.
 func toTextFormatString(s string) string {
 	return strings.ToLower(
-		replaceForTextFormatMatcher.ReplaceAllString(s, "_"),
+		strings.Trim(
+			replaceForTextFormatMatcher.ReplaceAllString(s, "-"), "-",
+		),
 	)
 }

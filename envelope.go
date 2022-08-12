@@ -285,14 +285,14 @@ func (e *Envelope) CleanSignets() {
 		}
 	}
 	for i, signet := range e.Senders {
-		e.Secrets[i] = &Signet{
+		e.Senders[i] = &Signet{
 			Version: signet.Version,
 			ID:      signet.ID,
 			Scheme:  signet.Scheme,
 		}
 	}
 	for i, signet := range e.Recipients {
-		e.Secrets[i] = &Signet{
+		e.Recipients[i] = &Signet{
 			Version: signet.Version,
 			ID:      signet.ID,
 			Scheme:  signet.Scheme,

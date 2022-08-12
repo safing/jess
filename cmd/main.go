@@ -53,7 +53,7 @@ func main() {
 	rootCmd.PersistentFlags().StringVarP(&trustStoreDir, "tsdir", "d", "",
 		"specify a truststore directory (default loaded from JESS_TS_DIR env variable)",
 	)
-	rootCmd.PersistentFlags().StringVarP(&trustStoreDir, "tskeyring", "k", "",
+	rootCmd.PersistentFlags().StringVarP(&trustStoreKeyring, "tskeyring", "r", "",
 		"specify a truststore keyring namespace (default loaded from JESS_TS_KEYRING env variable) - lower priority than tsdir",
 	)
 	rootCmd.PersistentFlags().StringVarP(&noSpec, "no", "n", "",

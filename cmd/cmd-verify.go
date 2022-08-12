@@ -83,7 +83,7 @@ var verifyCmd = &cobra.Command{
 					}
 
 					// Only verify if .sig or .letter.
-					if strings.HasSuffix(path, sigFileExtension) ||
+					if strings.HasSuffix(path, filesig.Extension) ||
 						strings.HasSuffix(path, letterFileExtension) {
 						if err := verify(path, true); err != nil {
 							verificationFails++
@@ -135,11 +135,11 @@ func verify(filename string, bulkMode bool) error {
 		signedBy, err = verifyLetter(filename, bulkMode)
 	case strings.HasSuffix(filename, letterFileExtension):
 		signedBy, err = verifyLetter(filename, bulkMode)
-	case strings.HasSuffix(filename, sigFileExtension):
-		filename = strings.TrimSuffix(filename, sigFileExtension)
+	case strings.HasSuffix(filename, filesig.Extension):
+		filename = strings.TrimSuffix(filename, filesig.Extension)
 		fallthrough
 	default:
-		signame = filename + sigFileExtension
+		signame = filename + filesig.Extension
 		signedBy, err = verifySig(filename, signame, bulkMode)
 	}
 

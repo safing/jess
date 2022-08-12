@@ -9,6 +9,9 @@ import (
 	"github.com/safing/portbase/formats/dsd"
 )
 
+// Extension holds the default file extension to be used for signature files.
+const Extension = ".sig"
+
 var fileSigRequirements = jess.NewRequirements().
 	Remove(jess.RecipientAuthentication).
 	Remove(jess.Confidentiality)
