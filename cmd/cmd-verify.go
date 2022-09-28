@@ -3,8 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -185,9 +185,9 @@ func verifyLetter(filename string, silent bool) (signedBy []string, err error) {
 	// load file
 	var data []byte
 	if filename == "-" {
-		data, err = ioutil.ReadAll(os.Stdin)
+		data, err = io.ReadAll(os.Stdin)
 	} else {
-		data, err = ioutil.ReadFile(filename)
+		data, err = os.ReadFile(filename)
 	}
 	if err != nil {
 		return nil, err

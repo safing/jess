@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Keywords and Prefixes for the export text format.
 const (
 	ExportSenderKeyword = "sender"
 	ExportSenderPrefix  = "sender:"

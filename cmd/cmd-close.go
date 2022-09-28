@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 
@@ -89,9 +89,9 @@ var (
 			// load file
 			var data []byte
 			if filename == "-" {
-				data, err = ioutil.ReadAll(os.Stdin)
+				data, err = io.ReadAll(os.Stdin)
 			} else {
-				data, err = ioutil.ReadFile(filename)
+				data, err = os.ReadFile(filename)
 			}
 			if err != nil {
 				return err

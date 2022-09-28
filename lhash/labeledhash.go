@@ -36,7 +36,7 @@ func Digest(alg Algorithm, data []byte) *LabeledHash {
 // DigestFile creates a new labeled hash and digests the given file.
 func DigestFile(alg Algorithm, pathToFile string) (*LabeledHash, error) {
 	// Open file that should be hashed.
-	file, err := os.OpenFile(pathToFile, os.O_RDONLY, 0)
+	file, err := os.Open(pathToFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file: %w", err)
 	}
@@ -181,7 +181,7 @@ func (lh *LabeledHash) Matches(data []byte) bool {
 }
 
 // MatchesData returns true if the digest of the given data matches the hash.
-// DEPRECATED: Use Matches instead.
+// Deprecated: Use Matches instead.
 func (lh *LabeledHash) MatchesData(data []byte) bool {
 	return lh.Equal(Digest(lh.alg, data))
 }

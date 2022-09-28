@@ -16,7 +16,6 @@ import (
 const (
 	stdInOutFilename    = "-"
 	letterFileExtension = ".letter"
-	sigFileExtension    = ".sig"
 
 	warnFileSize = 12000000 // 120MB
 )

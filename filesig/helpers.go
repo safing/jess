@@ -3,7 +3,6 @@ package filesig
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -51,7 +50,7 @@ func SignFile(dataFilePath, signatureFilePath string, metaData map[string]string
 		return nil, fmt.Errorf("failed to sign file: %w", err)
 	}
 
-	sigFileData, err := ioutil.ReadFile(signatureFilePath)
+	sigFileData, err := os.ReadFile(signatureFilePath)
 	var newSigFileData []byte
 	switch {
 	case err == nil:
@@ -71,7 +70,7 @@ func SignFile(dataFilePath, signatureFilePath string, metaData map[string]string
 	}
 
 	// Write the signature to file.
-	if err := ioutil.WriteFile(signatureFilePath, newSigFileData, 0o0644); err != nil { //nolint:gosec
+	if err := os.WriteFile(signatureFilePath, newSigFileData, 0o0644); err != nil { //nolint:gosec
 		return nil, fmt.Errorf("failed to write signature to file: %w", err)
 	}
 
@@ -86,7 +85,7 @@ func VerifyFile(dataFilePath, signatureFilePath string, metaData map[string]stri
 	var lastErr error
 
 	// Read signature from file.
-	sigFileData, err := ioutil.ReadFile(signatureFilePath)
+	sigFileData, err := os.ReadFile(signatureFilePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read signature file: %w", err)
 	}

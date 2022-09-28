@@ -225,10 +225,8 @@ func TestCoreAllCombinations(t *testing.T) {
 	t.Logf("of these, %d were successfully detected as invalid", combinationsDetectedInvalid)
 }
 
-func testStorage(t *testing.T, suite *Suite) (detectedInvalid bool) {
-	t.Helper()
-
-	// t.Logf("testing storage with %s", suite.ID)
+func testStorage(t *testing.T, suite *Suite) (detectedInvalid bool) { //nolint:thelper
+	t.Logf("testing storage with %s", suite.ID)
 
 	e, err := setupEnvelopeAndTrustStore(t, suite)
 	if err != nil {
@@ -404,9 +402,7 @@ func setupEnvelopeAndTrustStore(t *testing.T, suite *Suite) (*Envelope, error) {
 	}
 
 	// check if we are missing key derivation - this is only ok if we are merely signing
-	if !keyDerPresent &&
-		(len(e.suite.Provides.all) != 1 ||
-			!e.suite.Provides.Has(SenderAuthentication)) {
+	if !keyDerPresent && len(e.Senders) != len(e.suite.Tools) {
 		return nil, testInvalidToolset(e, "omitting a key derivation tool is only allowed when merely signing")
 	}
 
@@ -514,9 +510,10 @@ func getOrMakeSignet(t *testing.T, tool tools.ToolLogic, recipient bool, signetI
 }
 
 // generateCombinations returns all possible combinations of the given []string slice.
-//   Forked from https://github.com/mxschmitt/golang-combinations/blob/a887187146560effd2677e987b069262f356297f/combinations.go
-//   Copyright (c) 2018 Max Schmitt,
-//   MIT License.
+//
+//	Forked from https://github.com/mxschmitt/golang-combinations/blob/a887187146560effd2677e987b069262f356297f/combinations.go
+//	Copyright (c) 2018 Max Schmitt,
+//	MIT License.
 func generateCombinations(set []string) (subsets [][]string) {
 	length := uint(len(set))
 

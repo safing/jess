@@ -2,7 +2,6 @@ package truststores
 
 import (
 	"errors"
-	"io/ioutil"
 	"os"
 
 	"github.com/safing/jess"
@@ -27,7 +26,7 @@ func WriteSignetToFile(signet *jess.Signet, filename string) error {
 	}
 
 	// write
-	err = ioutil.WriteFile(filename, data, 0o0600)
+	err = os.WriteFile(filename, data, 0o0600)
 	if err != nil {
 		return err
 	}
@@ -37,7 +36,7 @@ func WriteSignetToFile(signet *jess.Signet, filename string) error {
 
 // LoadSignetFromFile loads a signet from the given filepath.
 func LoadSignetFromFile(filename string) (*jess.Signet, error) {
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, jess.ErrSignetNotFound
@@ -72,7 +71,7 @@ func WriteEnvelopeToFile(envelope *jess.Envelope, filename string) error {
 	}
 
 	// write to storage
-	err = ioutil.WriteFile(filename, data, 0600) //nolint:gofumpt // gofumpt is ignorant of octal numbers.
+	err = os.WriteFile(filename, data, 0600) //nolint:gofumpt // gofumpt is ignorant of octal numbers.
 	if err != nil {
 		return err
 	}
@@ -82,7 +81,7 @@ func WriteEnvelopeToFile(envelope *jess.Envelope, filename string) error {
 
 // LoadEnvelopeFromFile loads an envelope from the given filepath.
 func LoadEnvelopeFromFile(filename string) (*jess.Envelope, error) {
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, jess.ErrEnvelopeNotFound
