@@ -175,16 +175,38 @@ func (lh *LabeledHash) EqualRaw(otherDigest []byte) bool {
 	return subtle.ConstantTimeCompare(lh.digest, otherDigest) == 1
 }
 
-// MatchesString returns true if the digest of the given string matches the hash.
-func (lh *LabeledHash) MatchesString(s string) bool {
-	return lh.MatchesData([]byte(s))
+// Matches returns true if the digest of the given data matches the hash.
+func (lh *LabeledHash) Matches(data []byte) bool {
+	return lh.Equal(Digest(lh.alg, data))
 }
 
 // MatchesData returns true if the digest of the given data matches the hash.
+// DEPRECATED: Use Matches instead.
 func (lh *LabeledHash) MatchesData(data []byte) bool {
-	hasher := lh.alg.new()
-	_, _ = hasher.Write(data) // never returns an error
-	defer hasher.Reset()      // internal state may leak data if kept in memory
+	return lh.Equal(Digest(lh.alg, data))
+}
 
-	return subtle.ConstantTimeCompare(lh.digest, hasher.Sum(nil)) == 1
+// MatchesString returns true if the digest of the given string matches the hash.
+func (lh *LabeledHash) MatchesString(s string) bool {
+	return lh.Matches([]byte(s))
+}
+
+// MatchesFile returns true if the digest of the given file matches the hash.
+func (lh *LabeledHash) MatchesFile(pathToFile string) (bool, error) {
+	fileHash, err := DigestFile(lh.alg, pathToFile)
+	if err != nil {
+		return false, err
+	}
+
+	return lh.Equal(fileHash), nil
+}
+
+// MatchesReader returns true if the digest of the given reader matches the hash.
+func (lh *LabeledHash) MatchesReader(reader io.Reader) (bool, error) {
+	readerHash, err := DigestFromReader(lh.alg, reader)
+	if err != nil {
+		return false, err
+	}
+
+	return lh.Equal(readerHash), nil
 }

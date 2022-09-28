@@ -42,13 +42,13 @@ func testAlgorithm(t *testing.T, alg Algorithm, emptyHex, foxHex string) {
 	}
 
 	// test matching with serialized/loaded labeled hash
-	if !lh.MatchesData(testFoxData) {
+	if !lh.Matches(testFoxData) {
 		t.Errorf("alg %d: failed to match reference", alg)
 	}
 	if !lh.MatchesString(testFox) {
 		t.Errorf("alg %d: failed to match reference", alg)
 	}
-	if lh.MatchesData(noMatchData) {
+	if lh.Matches(noMatchData) {
 		t.Errorf("alg %d: failed to non-match garbage", alg)
 	}
 	if lh.MatchesString(noMatch) {
@@ -99,13 +99,13 @@ func testFormat(t *testing.T, alg Algorithm, lhs, loaded *LabeledHash) {
 	}
 
 	// Test matching.
-	if !loaded.MatchesData(testFoxData) {
+	if !loaded.Matches(testFoxData) {
 		t.Errorf("alg %d: failed to match reference", alg)
 	}
 	if !loaded.MatchesString(testFox) {
 		t.Errorf("alg %d: failed to match reference", alg)
 	}
-	if loaded.MatchesData(noMatchData) {
+	if loaded.Matches(noMatchData) {
 		t.Errorf("alg %d: failed to non-match garbage", alg)
 	}
 	if loaded.MatchesString(noMatch) {
