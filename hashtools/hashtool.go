@@ -3,6 +3,8 @@ package hashtools
 import (
 	"crypto"
 	"hash"
+
+	"github.com/safing/jess/lhash"
 )
 
 // HashTool holds generic information about a hash tool.
@@ -16,6 +18,8 @@ type HashTool struct {
 
 	Comment string
 	Author  string
+
+	labeledAlg lhash.Algorithm
 }
 
 // New returns a new hash.Hash instance of the hash tool.
@@ -46,6 +50,14 @@ func (ht *HashTool) With(changes *HashTool) *HashTool {
 	if changes.Author == "" {
 		changes.Author = ht.Author
 	}
+	if changes.labeledAlg == 0 {
+		changes.labeledAlg = ht.labeledAlg
+	}
 
 	return changes
+}
+
+// LabeledHasher returns the corresponding labeled hashing algorithm.
+func (ht *HashTool) LabeledHasher() lhash.Algorithm {
+	return ht.labeledAlg
 }

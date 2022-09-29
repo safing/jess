@@ -7,8 +7,8 @@ linters:
     - containedctx
     - contextcheck
     - cyclop
-    - errchkjson # Triggers stack overflow on github.com/safing/jess
     - exhaustivestruct
+    - exhaustruct
     - forbidigo
     - funlen
     - gochecknoglobals
@@ -18,6 +18,7 @@ linters:
     - goerr113 
     - gomnd
     - ifshort
+    - interfacebloat
     - interfacer
     - ireturn
     - lll
@@ -25,6 +26,9 @@ linters:
     - nilnil
     - nlreturn
     - noctx
+    - nolintlint
+    - nonamedreturns
+    - nosnakecase
     - revive
     - tagliatelle
     - testpackage

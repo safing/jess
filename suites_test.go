@@ -193,6 +193,7 @@ func suiteBullshitCheck(suite *Suite) error { //nolint:maintidx
 
 		case tools.PurposeSigning:
 			s.signers = append(s.signers, logic)
+			s.toolRequirements.Add(Integrity)
 			s.toolRequirements.Add(SenderAuthentication)
 
 		case tools.PurposeIntegratedCipher:
@@ -417,6 +418,7 @@ func computeSuiteAttributes(toolIDs []string, assumeKey bool) *Suite {
 			newSuite.Provides.Add(RecipientAuthentication)
 
 		case tools.PurposeSigning:
+			newSuite.Provides.Add(Integrity)
 			newSuite.Provides.Add(SenderAuthentication)
 
 		case tools.PurposeIntegratedCipher:

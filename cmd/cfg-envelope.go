@@ -30,7 +30,8 @@ func newEnvelope(name string) (*jess.Envelope, error) {
 			"Encrypt with key",
 			"Encrypt for someone and sign",
 			"Encrypt for someone but don't sign",
-			"Sign a file",
+			"Sign a file (wrapped)",
+			"Sign a file (separate sig)",
 		},
 	}
 	err := survey.AskOne(prompt, &preset, nil)
@@ -54,8 +55,11 @@ func newEnvelope(name string) (*jess.Envelope, error) {
 	case "Encrypt for someone but don't sign":
 		envelope.SuiteID = jess.SuiteRcptOnly
 		err = selectSignets(envelope, "recipient")
-	case "Sign a file":
+	case "Sign a file (wrapped)":
 		envelope.SuiteID = jess.SuiteSign
+		err = selectSignets(envelope, "sender")
+	case "Sign a file (separate sig)":
+		envelope.SuiteID = jess.SuiteSignFile
 		err = selectSignets(envelope, "sender")
 	}
 	if err != nil {
@@ -93,6 +97,7 @@ func editEnvelope(envelope *jess.Envelope) error {
 				{"Recipients", formatSignetNames(envelope.Recipients)},
 				{"Senders", formatSignetNames(envelope.Senders)},
 				{""},
+				{"Export", "export to text format"},
 				{"Abort", "discard changes and return"},
 				{"Delete", "delete and return"},
 			}),
@@ -105,8 +110,28 @@ func editEnvelope(envelope *jess.Envelope) error {
 
 		switch {
 		case strings.HasPrefix(submenu, "Done"):
-			// save
+			// Check if the envelope is valid.
+			if envelope.SecurityLevel == 0 {
+				fmt.Println("Envelope is invalid, please fix before saving.")
+				continue
+			}
+			// Remove and keys and save.
+			envelope.CleanSignets()
 			return trustStore.StoreEnvelope(envelope)
+		case strings.HasPrefix(submenu, "Export"):
+			// Check if the envelope is valid.
+			if envelope.SecurityLevel == 0 {
+				fmt.Println("Envelope is invalid, please fix before exporting.")
+				continue
+			}
+			// Remove keys and export.
+			envelope.CleanSignets()
+			text, err := envelope.Export(false)
+			if err != nil {
+				return fmt.Errorf("failed to export: %w", err)
+			}
+			fmt.Println("Exported envelope:")
+			fmt.Println(text)
 		case strings.HasPrefix(submenu, "Abort"):
 			return nil
 		case strings.HasPrefix(submenu, "Delete"):

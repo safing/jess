@@ -1,11 +1,14 @@
 package lhash
 
 import (
+	"bufio"
 	"crypto/subtle"
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/mr-tron/base58"
 
@@ -21,13 +24,41 @@ type LabeledHash struct {
 // Digest creates a new labeled hash and digests the given data.
 func Digest(alg Algorithm, data []byte) *LabeledHash {
 	hasher := alg.new()
-	_, _ = hasher.Write(data) // never returns an error
-	defer hasher.Reset()      // internal state may leak data if kept in memory
+	_, _ = hasher.Write(data) // Never returns an error.
+	defer hasher.Reset()      // Internal state may leak data if kept in memory.
 
 	return &LabeledHash{
 		alg:    alg,
 		digest: hasher.Sum(nil),
 	}
+}
+
+// DigestFile creates a new labeled hash and digests the given file.
+func DigestFile(alg Algorithm, pathToFile string) (*LabeledHash, error) {
+	// Open file that should be hashed.
+	file, err := os.Open(pathToFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open file: %w", err)
+	}
+
+	return DigestFromReader(alg, file)
+}
+
+// DigestFromReader creates a new labeled hash and digests from the given reader.
+func DigestFromReader(alg Algorithm, reader io.Reader) (*LabeledHash, error) {
+	hasher := alg.new()
+	defer hasher.Reset() // Internal state may leak data if kept in memory.
+
+	// Pipe all data directly to the hashing algorithm.
+	_, err := bufio.NewReader(reader).WriteTo(hasher)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read: %w", err)
+	}
+
+	return &LabeledHash{
+		alg:    alg,
+		digest: hasher.Sum(nil),
+	}, nil
 }
 
 // Load loads a labeled hash from the given []byte slice.
@@ -95,6 +126,16 @@ func FromBase58(base58Encoded string) (*LabeledHash, error) {
 	return Load(raw)
 }
 
+// Algorithm returns the algorithm of the labeled hash.
+func (lh *LabeledHash) Algorithm() Algorithm {
+	return lh.alg
+}
+
+// Sum returns the raw calculated hash digest.
+func (lh *LabeledHash) Sum() []byte {
+	return lh.digest
+}
+
 // Bytes return the []byte representation of the labeled hash.
 func (lh *LabeledHash) Bytes() []byte {
 	c := container.New()
@@ -127,16 +168,45 @@ func (lh *LabeledHash) Equal(other *LabeledHash) bool {
 		subtle.ConstantTimeCompare(lh.digest, other.digest) == 1
 }
 
-// MatchesString returns true if the digest of the given string matches the hash.
-func (lh *LabeledHash) MatchesString(s string) bool {
-	return lh.MatchesData([]byte(s))
+// EqualRaw returns true if the given raw hash digest is equal.
+// Equality is checked by comparing both the digest value only.
+// The caller must make sure the same algorithm is used.
+func (lh *LabeledHash) EqualRaw(otherDigest []byte) bool {
+	return subtle.ConstantTimeCompare(lh.digest, otherDigest) == 1
+}
+
+// Matches returns true if the digest of the given data matches the hash.
+func (lh *LabeledHash) Matches(data []byte) bool {
+	return lh.Equal(Digest(lh.alg, data))
 }
 
 // MatchesData returns true if the digest of the given data matches the hash.
+// Deprecated: Use Matches instead.
 func (lh *LabeledHash) MatchesData(data []byte) bool {
-	hasher := lh.alg.new()
-	_, _ = hasher.Write(data) // never returns an error
-	defer hasher.Reset()      // internal state may leak data if kept in memory
+	return lh.Equal(Digest(lh.alg, data))
+}
 
-	return subtle.ConstantTimeCompare(lh.digest, hasher.Sum(nil)) == 1
+// MatchesString returns true if the digest of the given string matches the hash.
+func (lh *LabeledHash) MatchesString(s string) bool {
+	return lh.Matches([]byte(s))
+}
+
+// MatchesFile returns true if the digest of the given file matches the hash.
+func (lh *LabeledHash) MatchesFile(pathToFile string) (bool, error) {
+	fileHash, err := DigestFile(lh.alg, pathToFile)
+	if err != nil {
+		return false, err
+	}
+
+	return lh.Equal(fileHash), nil
+}
+
+// MatchesReader returns true if the digest of the given reader matches the hash.
+func (lh *LabeledHash) MatchesReader(reader io.Reader) (bool, error) {
+	readerHash, err := DigestFromReader(lh.alg, reader)
+	if err != nil {
+		return false, err
+	}
+
+	return lh.Equal(readerHash), nil
 }

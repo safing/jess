@@ -3,6 +3,10 @@ package jess
 import (
 	"errors"
 	"fmt"
+
+	"github.com/mr-tron/base58"
+
+	"github.com/safing/portbase/formats/dsd"
 )
 
 // Envelope holds configuration for jess to put data into a letter.
@@ -267,4 +271,81 @@ func fillPassword(signet *Signet, createPassword bool, storage TrustStore, minSe
 		return createPasswordCallback(signet, minSecurityLevel)
 	}
 	return getPasswordCallback(signet)
+}
+
+// CleanSignets cleans all the signets from all the non-necessary data as well
+// as key material.
+// This is for preparing for serializing and saving the signet.
+func (e *Envelope) CleanSignets() {
+	for i, signet := range e.Secrets {
+		e.Secrets[i] = &Signet{
+			Version: signet.Version,
+			ID:      signet.ID,
+			Scheme:  signet.Scheme,
+		}
+	}
+	for i, signet := range e.Senders {
+		e.Senders[i] = &Signet{
+			Version: signet.Version,
+			ID:      signet.ID,
+			Scheme:  signet.Scheme,
+		}
+	}
+	for i, signet := range e.Recipients {
+		e.Recipients[i] = &Signet{
+			Version: signet.Version,
+			ID:      signet.ID,
+			Scheme:  signet.Scheme,
+		}
+	}
+}
+
+// ToBytes serializes the envelope to a byte slice.
+func (e *Envelope) ToBytes() ([]byte, error) {
+	// Minimize data and remove any key material.
+	e.CleanSignets()
+
+	// Serialize envelope.
+	data, err := dsd.Dump(e, dsd.CBOR)
+	if err != nil {
+		return nil, fmt.Errorf("failed to serialize the envelope: %w", err)
+	}
+
+	return data, nil
+}
+
+// EnvelopeFromBytes parses and loads a serialized envelope.
+func EnvelopeFromBytes(data []byte) (*Envelope, error) {
+	e := &Envelope{}
+
+	// Parse envelope from data.
+	if _, err := dsd.Load(data, e); err != nil {
+		return nil, fmt.Errorf("failed to parse data format: %w", err)
+	}
+
+	return e, nil
+}
+
+// ToBase58 serializes the envelope and encodes it with base58.
+func (e *Envelope) ToBase58() (string, error) {
+	// Serialize Signet.
+	data, err := e.ToBytes()
+	if err != nil {
+		return "", err
+	}
+
+	// Encode and return.
+	return base58.Encode(data), nil
+}
+
+// EnvelopeFromBase58 parses and loads a base58 encoded serialized envelope.
+func EnvelopeFromBase58(base58Encoded string) (*Envelope, error) {
+	// Decode string.
+	data, err := base58.Decode(base58Encoded)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode base58: %w", err)
+	}
+
+	// Parse and return.
+	return EnvelopeFromBytes(data)
 }

@@ -6,6 +6,7 @@ package lhash
 import (
 	"crypto"
 	"hash"
+	"io"
 
 	// Register SHA2 in Go's internal registry.
 	_ "crypto/sha256"
@@ -82,4 +83,66 @@ func (a Algorithm) new() hash.Hash {
 	default:
 		return nil
 	}
+}
+
+func (a Algorithm) String() string {
+	switch a {
+
+	// SHA2
+	case SHA2_224:
+		return "SHA2_224"
+	case SHA2_256:
+		return "SHA2_256"
+	case SHA2_384:
+		return "SHA2_384"
+	case SHA2_512:
+		return "SHA2_512"
+	case SHA2_512_224:
+		return "SHA2_512_224"
+	case SHA2_512_256:
+		return "SHA2_512_256"
+
+	// SHA3
+	case SHA3_224:
+		return "SHA3_224"
+	case SHA3_256:
+		return "SHA3_256"
+	case SHA3_384:
+		return "SHA3_384"
+	case SHA3_512:
+		return "SHA3_512"
+
+	// BLAKE2
+	case BLAKE2s_256:
+		return "BLAKE2s_256"
+	case BLAKE2b_256:
+		return "BLAKE2b_256"
+	case BLAKE2b_384:
+		return "BLAKE2b_384"
+	case BLAKE2b_512:
+		return "BLAKE2b_512"
+
+	default:
+		return "unknown"
+	}
+}
+
+// RawHasher returns a new raw hasher of the algorithm.
+func (a Algorithm) RawHasher() hash.Hash {
+	return a.new()
+}
+
+// Digest creates a new labeled hash and digests the given data.
+func (a Algorithm) Digest(data []byte) *LabeledHash {
+	return Digest(a, data)
+}
+
+// DigestFile creates a new labeled hash and digests the given file.
+func (a Algorithm) DigestFile(pathToFile string) (*LabeledHash, error) {
+	return DigestFile(a, pathToFile)
+}
+
+// DigestFromReader creates a new labeled hash and digests from the given reader.
+func (a Algorithm) DigestFromReader(reader io.Reader) (*LabeledHash, error) {
+	return DigestFromReader(a, reader)
 }

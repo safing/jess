@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 
@@ -12,7 +12,7 @@ import (
 
 func init() {
 	rootCmd.AddCommand(closeCmd)
-	closeCmd.Flags().StringVarP(&closeFlagOutput, "output", "o", "", "specify output file (`-` for stdout")
+	closeCmd.Flags().StringVarP(&closeFlagOutput, "output", "o", "", "specify output file (`-` for stdout)")
 }
 
 var (
@@ -49,10 +49,10 @@ var (
 			filename := args[0]
 			outputFilename := closeFlagOutput
 			if outputFilename == "" {
-				if strings.HasSuffix(filename, ".letter") {
+				if strings.HasSuffix(filename, letterFileExtension) {
 					return errors.New("cannot automatically derive output filename, please specify with --output")
 				}
-				outputFilename = filename + ".letter"
+				outputFilename = filename + letterFileExtension
 			}
 			// check input file
 			if filename != "-" {
@@ -89,9 +89,9 @@ var (
 			// load file
 			var data []byte
 			if filename == "-" {
-				data, err = ioutil.ReadAll(os.Stdin)
+				data, err = io.ReadAll(os.Stdin)
 			} else {
-				data, err = ioutil.ReadFile(filename)
+				data, err = os.ReadFile(filename)
 			}
 			if err != nil {
 				return err

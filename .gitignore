@@ -1,8 +1,7 @@
 cpu.out
 vendor
-cmd/cmd*
 cmd/jess*
 dist
 
-# Custom dev deops
+# Custom dev deps
 go.mod.*

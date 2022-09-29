@@ -1,8 +1,14 @@
 package truststores
 
 import (
+	"errors"
+
 	"github.com/safing/jess"
 )
+
+// ErrNotSupportedByTrustStore is returned by trust stores if they do not
+// support certain actions.
+var ErrNotSupportedByTrustStore = errors.New("action not supported by trust store")
 
 // ExtendedTrustStore holds a set of trusted Signets, Recipients and Envelopes.
 type ExtendedTrustStore interface {

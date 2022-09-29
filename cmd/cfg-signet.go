@@ -12,7 +12,7 @@ import (
 )
 
 //nolint:gocognit
-func newSignet(name, scheme string) (*jess.Signet, error) {
+func newSignet(name, scheme string, saveToTrustStore bool) (*jess.Signet, error) {
 	// get name
 	name = strings.TrimSpace(name)
 	if name == "" {
@@ -110,28 +110,30 @@ func newSignet(name, scheme string) (*jess.Signet, error) {
 		Created: time.Now(),
 	}
 
-	// write signet
-	err = trustStore.StoreSignet(signet)
-	if err != nil {
-		return nil, err
-	}
+	if saveToTrustStore {
+		// write signet
+		err = trustStore.StoreSignet(signet)
+		if err != nil {
+			return nil, err
+		}
 
-	// export as recipient
-	switch scheme {
-	case jess.SignetSchemePassword, jess.SignetSchemeKey:
-		// is secret, no recipient
-	default:
-		rcpt, err := signet.AsRecipient()
-		if err != nil {
-			return nil, err
-		}
-		err = rcpt.StoreKey()
-		if err != nil {
-			return nil, err
-		}
-		err = trustStore.StoreSignet(rcpt)
-		if err != nil {
-			return nil, err
+		// export as recipient
+		switch scheme {
+		case jess.SignetSchemePassword, jess.SignetSchemeKey:
+			// is secret, no recipient
+		default:
+			rcpt, err := signet.AsRecipient()
+			if err != nil {
+				return nil, err
+			}
+			err = rcpt.StoreKey()
+			if err != nil {
+				return nil, err
+			}
+			err = trustStore.StoreSignet(rcpt)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
