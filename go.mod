@@ -3,7 +3,7 @@ module github.com/safing/jess
 go 1.15
 
 require (
-	github.com/AlecAivazis/survey/v2 v2.3.5
+	github.com/AlecAivazis/survey/v2 v2.3.6
 	github.com/aead/ecdh v0.2.0
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
 	github.com/mr-tron/base58 v1.2.0
