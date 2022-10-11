@@ -3,6 +3,7 @@ package truststores
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -246,7 +247,7 @@ func NewDirTrustStore(storageDir string) (*DirTrustStore, error) {
 	// validate path
 	info, err := os.Stat(cleanedPath)
 	if err != nil {
-		if os.IsNotExist(err) {
+		if errors.Is(err, fs.ErrNotExist) {
 			return nil, fmt.Errorf("trust store does not exist: %w", err)
 		}
 		return nil, fmt.Errorf("failed to access trust store: %w", err)

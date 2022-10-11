@@ -2,6 +2,7 @@ package truststores
 
 import (
 	"errors"
+	"io/fs"
 	"os"
 
 	"github.com/safing/jess"
@@ -38,7 +39,7 @@ func WriteSignetToFile(signet *jess.Signet, filename string) error {
 func LoadSignetFromFile(filename string) (*jess.Signet, error) {
 	data, err := os.ReadFile(filename)
 	if err != nil {
-		if os.IsNotExist(err) {
+		if errors.Is(err, fs.ErrNotExist) {
 			return nil, jess.ErrSignetNotFound
 		}
 		return nil, err
@@ -83,7 +84,7 @@ func WriteEnvelopeToFile(envelope *jess.Envelope, filename string) error {
 func LoadEnvelopeFromFile(filename string) (*jess.Envelope, error) {
 	data, err := os.ReadFile(filename)
 	if err != nil {
-		if os.IsNotExist(err) {
+		if errors.Is(err, fs.ErrNotExist) {
 			return nil, jess.ErrEnvelopeNotFound
 		}
 		return nil, err

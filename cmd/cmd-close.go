@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"strings"
 
@@ -81,7 +82,7 @@ var (
 					if !confirmed {
 						return nil
 					}
-				} else if !os.IsNotExist(err) {
+				} else if !errors.Is(err, fs.ErrNotExist) {
 					return fmt.Errorf("failed to access output file: %w", err)
 				}
 			}
