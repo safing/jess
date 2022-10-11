@@ -3,6 +3,7 @@ package filesig
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"strings"
 
@@ -59,7 +60,7 @@ func SignFile(dataFilePath, signatureFilePath string, metaData map[string]string
 		if err != nil {
 			return nil, fmt.Errorf("failed to add signature to file: %w", err)
 		}
-	case os.IsNotExist(err):
+	case errors.Is(err, fs.ErrNotExist):
 		// Make signature section for saving to disk.
 		newSigFileData, err = MakeSigFileSection(signature)
 		if err != nil {
