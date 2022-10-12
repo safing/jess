@@ -8,7 +8,7 @@ require (
 	github.com/mr-tron/base58 v1.2.0
 	github.com/safing/portbase v0.16.2
 	github.com/satori/go.uuid v1.2.0
-	github.com/spf13/cobra v1.5.0
+	github.com/spf13/cobra v1.6.0
 	github.com/tevino/abool v1.2.0
 	github.com/zalando/go-keyring v0.2.1
 	golang.org/x/crypto v0.0.0-20221010152910-d6f0a8c073c2
