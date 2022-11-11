@@ -6,7 +6,7 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.3.6
 	github.com/aead/ecdh v0.2.0
 	github.com/mr-tron/base58 v1.2.0
-	github.com/safing/portbase v0.16.2
+	github.com/safing/portbase v0.16.3
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/cobra v1.5.0
 	github.com/tevino/abool v1.2.0
