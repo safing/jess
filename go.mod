@@ -11,6 +11,5 @@ require (
 	github.com/spf13/cobra v1.5.0
 	github.com/tevino/abool v1.2.0
 	github.com/zalando/go-keyring v0.2.1
-	golang.org/x/crypto v0.0.0-20221010152910-d6f0a8c073c2
-	golang.org/x/sys v0.0.0-20221010170243-090e33056c14 // indirect
+	golang.org/x/crypto v0.6.0
 )
