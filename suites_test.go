@@ -294,7 +294,7 @@ func suiteBullshitCheck(suite *Suite) error { //nolint:maintidx
 	// final checks
 	// ============
 
-	// check requirements requirements
+	// check requirements
 	if s.toolRequirements.Empty() {
 		return errors.New("suite does not provide any security attributes")
 	}

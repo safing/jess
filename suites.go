@@ -67,19 +67,19 @@ var (
 
 	// Currently Recommended Suites.
 
-	// SuiteKey is a a cipher suite for encryption with a key.
+	// SuiteKey is a cipher suite for encryption with a key.
 	SuiteKey = SuiteKeyV1
-	// SuitePassword is a a cipher suite for encryption with a password.
+	// SuitePassword is a cipher suite for encryption with a password.
 	SuitePassword = SuitePasswordV1
-	// SuiteRcptOnly is a a cipher suite for encrypting for someone, but without verifying the sender/source.
+	// SuiteRcptOnly is a cipher suite for encrypting for someone, but without verifying the sender/source.
 	SuiteRcptOnly = SuiteRcptOnlyV1
-	// SuiteSign is a a cipher suite for signing (no encryption).
+	// SuiteSign is a cipher suite for signing (no encryption).
 	SuiteSign = SuiteSignV1
-	// SuiteSignFile is a a cipher suite for signing files (no encryption).
+	// SuiteSignFile is a cipher suite for signing files (no encryption).
 	SuiteSignFile = SuiteSignFileV1
-	// SuiteComplete is a a cipher suite for both encrypting for someone and signing.
+	// SuiteComplete is a cipher suite for both encrypting for someone and signing.
 	SuiteComplete = SuiteCompleteV1
-	// SuiteWire is a a cipher suite for network communication, including authentication of the server, but not the client.
+	// SuiteWire is a cipher suite for network communication, including authentication of the server, but not the client.
 	SuiteWire = SuiteWireV1
 )
 
