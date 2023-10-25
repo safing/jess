@@ -58,7 +58,7 @@ func (krts *KeyringTrustStore) GetSignet(id string, recipient bool) (*jess.Signe
 	// Get data from keyring.
 	data, err := keyring.Get(krts.serviceName, id)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s", jess.ErrSignetNotFound, err)
+		return nil, fmt.Errorf("%w: %w", jess.ErrSignetNotFound, err)
 	}
 
 	// Parse and return.
@@ -111,7 +111,7 @@ func (krts *KeyringTrustStore) GetEnvelope(name string) (*jess.Envelope, error) 
 	// Get data from keyring.
 	data, err := keyring.Get(krts.serviceName, name)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s", jess.ErrEnvelopeNotFound, err)
+		return nil, fmt.Errorf("%w: %w", jess.ErrEnvelopeNotFound, err)
 	}
 
 	// Parse and return.

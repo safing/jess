@@ -304,7 +304,7 @@ func (s *Session) Open(letter *Letter) ([]byte, error) { //nolint:gocognit,gocyc
 	for i := len(s.integratedCiphers) - 1; i >= 0; i-- {
 		data, err = s.integratedCiphers[i].AuthenticatedDecrypt(data, associatedData)
 		if err != nil {
-			return nil, fmt.Errorf("%w: [%s] %s", ErrIntegrityViolation, s.integratedCiphers[i].Info().Name, err)
+			return nil, fmt.Errorf("%w: [%s] %w", ErrIntegrityViolation, s.integratedCiphers[i].Info().Name, err)
 		}
 	}
 
@@ -312,7 +312,7 @@ func (s *Session) Open(letter *Letter) ([]byte, error) { //nolint:gocognit,gocyc
 	for i := len(s.ciphers) - 1; i >= 0; i-- {
 		data, err = s.ciphers[i].Decrypt(data)
 		if err != nil {
-			return nil, fmt.Errorf("%w: decryption failed: [%s] %s", ErrIntegrityViolation, s.ciphers[i].Info().Name, err)
+			return nil, fmt.Errorf("%w: decryption failed: [%s] %w", ErrIntegrityViolation, s.ciphers[i].Info().Name, err)
 		}
 	}
 

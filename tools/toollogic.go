@@ -101,7 +101,7 @@ type ToolLogic interface {
 
 	// Signet Handling
 
-	// LoadKey loads a key from the Signet's key storage (`Key`) into the Signet's cache (`Loaded*`). If the Signet is marked as public, the storage is expected to only have the public key present, only only it will be loaded.
+	// LoadKey loads a key from the Signet's key storage (`Key`) into the Signet's cache (`Loaded*`). If the Signet is marked as public, the storage is expected to only have the public key present, only it will be loaded.
 	// Must work with a static (no Setup()) ToolLogic.
 	// Must be overridden by tools that declare FeatureKeyExchange, FeatureKeyEncapsulation or FeatureSigning.
 	LoadKey(SignetInt) error

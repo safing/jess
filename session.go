@@ -369,7 +369,7 @@ func newSession(e *Envelope) (*Session, error) { //nolint:maintidx
 	// final checks
 	// ============
 
-	// check requirements requirements
+	// check requirements
 	if s.toolRequirements.Empty() {
 		return nil, errors.New("envelope excludes all security requirements, no meaningful operation possible")
 	}
@@ -518,7 +518,7 @@ func (s *Session) checkSecurityLevel(levelToCheck int, subject func() string) er
 	switch {
 	case minimumSecurityLevel > 0:
 		// check against minimumSecurityLevel
-		// minimumSecurityLevel overrides other checks
+		// (overrides other checks)
 		if levelToCheck < minimumSecurityLevel {
 			return fmt.Errorf(
 				`%s with a security level of %d is weaker than the desired security level of %d`,
