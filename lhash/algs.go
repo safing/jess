@@ -18,6 +18,8 @@ import (
 	// Register BLAKE2 in Go's internal registry.
 	_ "golang.org/x/crypto/blake2b"
 	_ "golang.org/x/crypto/blake2s"
+
+	"github.com/zeebo/blake3"
 )
 
 // Algorithm is an identifier for a hash function.
@@ -41,6 +43,8 @@ const (
 	BLAKE2b_256 Algorithm = 25
 	BLAKE2b_384 Algorithm = 26
 	BLAKE2b_512 Algorithm = 27
+
+	BLAKE3 Algorithm = 32
 )
 
 func (a Algorithm) new() hash.Hash {
@@ -70,7 +74,7 @@ func (a Algorithm) new() hash.Hash {
 	case SHA3_512:
 		return crypto.SHA3_512.New()
 
-	// BLAKE2
+		// BLAKE2
 	case BLAKE2s_256:
 		return crypto.BLAKE2s_256.New()
 	case BLAKE2b_256:
@@ -79,6 +83,10 @@ func (a Algorithm) new() hash.Hash {
 		return crypto.BLAKE2b_384.New()
 	case BLAKE2b_512:
 		return crypto.BLAKE2b_512.New()
+
+		// BLAKE3
+	case BLAKE3:
+		return blake3.New()
 
 	default:
 		return nil
@@ -121,6 +129,10 @@ func (a Algorithm) String() string {
 		return "BLAKE2b_384"
 	case BLAKE2b_512:
 		return "BLAKE2b_512"
+
+		// BLAKE3
+	case BLAKE3:
+		return "BLAKE3"
 
 	default:
 		return "unknown"

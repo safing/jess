@@ -18,7 +18,8 @@ func init() {
 
 	Register(blake2bBase.With(&HashTool{
 		Name:          "BLAKE2s-256",
-		Hash:          crypto.BLAKE2s_256,
+		NewHash:       crypto.BLAKE2s_256.New,
+		CryptoHashID:  crypto.BLAKE2b_256,
 		DigestSize:    crypto.BLAKE2s_256.Size(),
 		BlockSize:     crypto.BLAKE2s_256.New().BlockSize(),
 		SecurityLevel: 128,
@@ -27,7 +28,8 @@ func init() {
 	}))
 	Register(blake2bBase.With(&HashTool{
 		Name:          "BLAKE2b-256",
-		Hash:          crypto.BLAKE2b_256,
+		NewHash:       crypto.BLAKE2b_256.New,
+		CryptoHashID:  crypto.BLAKE2b_256,
 		DigestSize:    crypto.BLAKE2b_256.Size(),
 		BlockSize:     crypto.BLAKE2b_256.New().BlockSize(),
 		SecurityLevel: 128,
@@ -35,7 +37,8 @@ func init() {
 	}))
 	Register(blake2bBase.With(&HashTool{
 		Name:          "BLAKE2b-384",
-		Hash:          crypto.BLAKE2b_384,
+		NewHash:       crypto.BLAKE2b_384.New,
+		CryptoHashID:  crypto.BLAKE2b_384,
 		DigestSize:    crypto.BLAKE2b_384.Size(),
 		BlockSize:     crypto.BLAKE2b_384.New().BlockSize(),
 		SecurityLevel: 192,
@@ -43,7 +46,8 @@ func init() {
 	}))
 	Register(blake2bBase.With(&HashTool{
 		Name:          "BLAKE2b-512",
-		Hash:          crypto.BLAKE2b_512,
+		NewHash:       crypto.BLAKE2b_512.New,
+		CryptoHashID:  crypto.BLAKE2b_512,
 		DigestSize:    crypto.BLAKE2b_512.Size(),
 		BlockSize:     crypto.BLAKE2b_512.New().BlockSize(),
 		SecurityLevel: 256,

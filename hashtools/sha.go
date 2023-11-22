@@ -20,7 +20,8 @@ func init() {
 	}
 	Register(sha2Base.With(&HashTool{
 		Name:          "SHA2-224",
-		Hash:          crypto.SHA224,
+		NewHash:       crypto.SHA224.New,
+		CryptoHashID:  crypto.SHA224,
 		DigestSize:    crypto.SHA224.Size(),
 		BlockSize:     crypto.SHA224.New().BlockSize(),
 		SecurityLevel: 112,
@@ -29,7 +30,8 @@ func init() {
 	}))
 	Register(sha2Base.With(&HashTool{
 		Name:          "SHA2-256",
-		Hash:          crypto.SHA256,
+		NewHash:       crypto.SHA256.New,
+		CryptoHashID:  crypto.SHA256,
 		DigestSize:    crypto.SHA256.Size(),
 		BlockSize:     crypto.SHA256.New().BlockSize(),
 		SecurityLevel: 128,
@@ -37,7 +39,8 @@ func init() {
 	}))
 	Register(sha2Base.With(&HashTool{
 		Name:          "SHA2-384",
-		Hash:          crypto.SHA384,
+		NewHash:       crypto.SHA384.New,
+		CryptoHashID:  crypto.SHA384,
 		DigestSize:    crypto.SHA384.Size(),
 		BlockSize:     crypto.SHA384.New().BlockSize(),
 		SecurityLevel: 192,
@@ -45,7 +48,8 @@ func init() {
 	}))
 	Register(sha2Base.With(&HashTool{
 		Name:          "SHA2-512",
-		Hash:          crypto.SHA512,
+		NewHash:       crypto.SHA512.New,
+		CryptoHashID:  crypto.SHA512,
 		DigestSize:    crypto.SHA512.Size(),
 		BlockSize:     crypto.SHA512.New().BlockSize(),
 		SecurityLevel: 256,
@@ -53,7 +57,8 @@ func init() {
 	}))
 	Register(sha2Base.With(&HashTool{
 		Name:          "SHA2-512-224",
-		Hash:          crypto.SHA512_224,
+		NewHash:       crypto.SHA512_224.New,
+		CryptoHashID:  crypto.SHA512_224,
 		DigestSize:    crypto.SHA512_224.Size(),
 		BlockSize:     crypto.SHA512_224.New().BlockSize(),
 		SecurityLevel: 112,
@@ -61,7 +66,8 @@ func init() {
 	}))
 	Register(sha2Base.With(&HashTool{
 		Name:          "SHA2-512-256",
-		Hash:          crypto.SHA512_256,
+		NewHash:       crypto.SHA512_256.New,
+		CryptoHashID:  crypto.SHA512_256,
 		DigestSize:    crypto.SHA512_256.Size(),
 		BlockSize:     crypto.SHA512_256.New().BlockSize(),
 		SecurityLevel: 128,
@@ -75,7 +81,8 @@ func init() {
 	}
 	Register(sha3Base.With(&HashTool{
 		Name:          "SHA3-224",
-		Hash:          crypto.SHA3_224,
+		NewHash:       crypto.SHA3_224.New,
+		CryptoHashID:  crypto.SHA3_224,
 		DigestSize:    crypto.SHA3_224.Size(),
 		BlockSize:     crypto.SHA3_224.New().BlockSize(),
 		SecurityLevel: 112,
@@ -83,7 +90,8 @@ func init() {
 	}))
 	Register(sha3Base.With(&HashTool{
 		Name:          "SHA3-256",
-		Hash:          crypto.SHA3_256,
+		NewHash:       crypto.SHA3_256.New,
+		CryptoHashID:  crypto.SHA3_256,
 		DigestSize:    crypto.SHA3_256.Size(),
 		BlockSize:     crypto.SHA3_256.New().BlockSize(),
 		SecurityLevel: 128,
@@ -91,7 +99,8 @@ func init() {
 	}))
 	Register(sha3Base.With(&HashTool{
 		Name:          "SHA3-384",
-		Hash:          crypto.SHA3_384,
+		NewHash:       crypto.SHA3_384.New,
+		CryptoHashID:  crypto.SHA3_384,
 		DigestSize:    crypto.SHA3_384.Size(),
 		BlockSize:     crypto.SHA3_384.New().BlockSize(),
 		SecurityLevel: 192,
@@ -99,7 +108,8 @@ func init() {
 	}))
 	Register(sha3Base.With(&HashTool{
 		Name:          "SHA3-512",
-		Hash:          crypto.SHA3_512,
+		NewHash:       crypto.SHA3_512.New,
+		CryptoHashID:  crypto.SHA3_512,
 		DigestSize:    crypto.SHA3_512.Size(),
 		BlockSize:     crypto.SHA3_512.New().BlockSize(),
 		SecurityLevel: 256,
