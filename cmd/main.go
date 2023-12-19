@@ -41,7 +41,7 @@ var (
 )
 
 func main() {
-	info.Set("jess", "0.3.2", "GPLv3", true)
+	info.Set("jess", "0.3.3", "GPLv3", true)
 
 	err := info.CheckVersion()
 	if err != nil {
