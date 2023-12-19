@@ -10,7 +10,9 @@ import (
 // HashTool holds generic information about a hash tool.
 type HashTool struct {
 	Name string
-	Hash crypto.Hash
+
+	NewHash      func() hash.Hash
+	CryptoHashID crypto.Hash
 
 	DigestSize    int // in bytes
 	BlockSize     int // in bytes
@@ -24,7 +26,7 @@ type HashTool struct {
 
 // New returns a new hash.Hash instance of the hash tool.
 func (ht *HashTool) New() hash.Hash {
-	return ht.Hash.New()
+	return ht.NewHash()
 }
 
 // With uses the original HashTool as a template for a new HashTool and returns the new HashTool.
@@ -32,8 +34,11 @@ func (ht *HashTool) With(changes *HashTool) *HashTool {
 	if changes.Name == "" {
 		changes.Name = ht.Name
 	}
-	if changes.Hash == 0 {
-		changes.Hash = ht.Hash
+	if changes.NewHash == nil {
+		changes.NewHash = ht.NewHash
+	}
+	if changes.CryptoHashID == 0 {
+		changes.CryptoHashID = ht.CryptoHashID
 	}
 	if changes.DigestSize == 0 {
 		changes.DigestSize = ht.DigestSize

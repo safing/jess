@@ -2,6 +2,7 @@ package gostdlib
 
 import (
 	"crypto/rsa"
+	"errors"
 
 	"github.com/safing/jess/tools"
 )
@@ -38,11 +39,14 @@ func (pss *RsaPSS) Sign(data, associatedData []byte, signet tools.SignetInt) ([]
 	if err != nil {
 		return nil, err
 	}
+	if pss.HashTool().CryptoHashID == 0 {
+		return nil, errors.New("tool PSS is only compatible with Golang crypto.Hash hash functions")
+	}
 
 	return rsa.SignPSS(
 		pss.Helper().Random(),
 		rsaPrivKey,
-		pss.HashTool().Hash,
+		pss.HashTool().CryptoHashID,
 		hashsum,
 		nil, // *rsa.PSSOptions
 	)
@@ -59,10 +63,13 @@ func (pss *RsaPSS) Verify(data, associatedData, signature []byte, signet tools.S
 	if err != nil {
 		return err
 	}
+	if pss.HashTool().CryptoHashID == 0 {
+		return errors.New("tool PSS is only compatible with Golang crypto.Hash hash functions")
+	}
 
 	return rsa.VerifyPSS(
 		rsaPubKey,
-		pss.HashTool().Hash,
+		pss.HashTool().CryptoHashID,
 		hashsum,
 		signature,
 		nil, // *rsa.PSSOptions
