@@ -1,54 +1,22 @@
 #!/bin/bash
+set -eo pipefail
 
 baseDir="$( cd "$(dirname "$0")" && pwd )"
 cd "$baseDir"
 
-# get build data
-if [[ "$BUILD_COMMIT" == "" ]]; then
-  BUILD_COMMIT=$(git describe --all --long --abbrev=99 --dirty 2>/dev/null)
-fi
-if [[ "$BUILD_USER" == "" ]]; then
-  BUILD_USER=$(id -un)
-fi
-if [[ "$BUILD_HOST" == "" ]]; then
-  BUILD_HOST=$(hostname)
-fi
-if [[ "$BUILD_DATE" == "" ]]; then
-  BUILD_DATE=$(date +%d.%m.%Y)
-fi
-if [[ "$BUILD_SOURCE" == "" ]]; then
-  BUILD_SOURCE=$(git remote -v | grep origin | cut -f2 | cut -d" " -f1 | head -n 1)
-fi
-if [[ "$BUILD_SOURCE" == "" ]]; then
-  BUILD_SOURCE=$(git remote -v | cut -f2 | cut -d" " -f1 | head -n 1)
-fi
-BUILD_BUILDOPTIONS=$(echo $* | sed "s/ /§/g")
-
-# check
-if [[ "$BUILD_COMMIT" == "" ]]; then
-  echo "could not automatically determine BUILD_COMMIT, please supply manually as environment variable."
-  exit 1
-fi
-if [[ "$BUILD_USER" == "" ]]; then
-  echo "could not automatically determine BUILD_USER, please supply manually as environment variable."
-  exit 1
-fi
-if [[ "$BUILD_HOST" == "" ]]; then
-  echo "could not automatically determine BUILD_HOST, please supply manually as environment variable."
-  exit 1
-fi
-if [[ "$BUILD_DATE" == "" ]]; then
-  echo "could not automatically determine BUILD_DATE, please supply manually as environment variable."
-  exit 1
-fi
-if [[ "$BUILD_SOURCE" == "" ]]; then
-  echo "could not automatically determine BUILD_SOURCE, please supply manually as environment variable."
-  exit 1
-fi
-
 echo "Please notice, that this build script includes metadata into the build."
 echo "This information is useful for debugging and license compliance."
 echo "Run the compiled binary with the version command to see the information included."
+
+# Get version.
+VERSION="$(git tag --points-at)" || true
+test -z "$VERSION" && DEV_VERSION="$(git describe --tags --first-parent --abbrev=0)" || true
+test -n "$DEV_VERSION" && VERSION="${DEV_VERSION}_dev_build"
+test -z "$VERSION" && VERSION="dev_build"
+BUILD_SOURCE=$( ( git remote -v | cut -f2 | cut -d" " -f1 | head -n 1 ) || echo "unknown" )
+BUILD_TIME=$(date -u "+%Y-%m-%dT%H:%M:%SZ" || echo "unknown")
+
+LDFLAGS="-X main.Version=${VERSION} -X main.BuildSource=${BUILD_SOURCE} -X main.BuildTime=${BUILD_TIME}"
 
 # build output name
 BIN_NAME="jess"
@@ -56,6 +24,6 @@ if [[ "$GOOS" == "windows" ]]; then
   BIN_NAME="${BIN_NAME}.exe"
 fi
 
-# build
-BUILD_PATH="github.com/safing/portbase/info"
-go build -o "${BIN_NAME}" -ldflags "-X ${BUILD_PATH}.commit=${BUILD_COMMIT} -X ${BUILD_PATH}.buildOptions=${BUILD_BUILDOPTIONS} -X ${BUILD_PATH}.buildUser=${BUILD_USER} -X ${BUILD_PATH}.buildHost=${BUILD_HOST} -X ${BUILD_PATH}.buildDate=${BUILD_DATE} -X ${BUILD_PATH}.buildSource=${BUILD_SOURCE}" "$@"
+# Build.
+export CGO_ENABLED=0
+go build -o "${BIN_NAME}" -ldflags "$LDFLAGS" "$@"

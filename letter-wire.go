@@ -3,7 +3,7 @@ package jess
 import (
 	"errors"
 
-	"github.com/safing/portbase/container"
+	"github.com/safing/structures/container"
 )
 
 /*

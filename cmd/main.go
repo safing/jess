@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -10,7 +9,6 @@ import (
 	"github.com/safing/jess"
 	_ "github.com/safing/jess/tools/all"
 	"github.com/safing/jess/truststores"
-	"github.com/safing/portbase/info"
 )
 
 const (
@@ -41,14 +39,6 @@ var (
 )
 
 func main() {
-	info.Set("jess", "0.3.3", "GPLv3", true)
-
-	err := info.CheckVersion()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
 	rootCmd.PersistentFlags().StringVarP(&trustStoreDir, "tsdir", "d", "",
 		"specify a truststore directory (default loaded from JESS_TS_DIR env variable)",
 	)
@@ -62,8 +52,7 @@ func main() {
 	rootCmd.PersistentFlags().IntVarP(&minimumSecurityLevel, "seclevel", "s", 0, "specify a minimum security level")
 	rootCmd.PersistentFlags().IntVarP(&defaultSymmetricKeySize, "symkeysize", "k", 0, "specify a default symmetric key size (only applies in certain conditions, use when prompted)")
 
-	err = rootCmd.Execute()
-	if err != nil {
+	if rootCmd.Execute() != nil {
 		os.Exit(1)
 	}
 	os.Exit(0)

@@ -7,7 +7,7 @@ import (
 	"github.com/aead/ecdh"
 
 	"github.com/safing/jess/tools"
-	"github.com/safing/portbase/container"
+	"github.com/safing/structures/container"
 )
 
 func init() {

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/safing/portbase/container"
+	"github.com/safing/structures/container"
 )
 
 func TestWire(t *testing.T) {

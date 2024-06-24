@@ -6,7 +6,7 @@ import (
 
 	"github.com/mr-tron/base58"
 
-	"github.com/safing/portbase/formats/dsd"
+	"github.com/safing/structures/dsd"
 )
 
 // Envelope holds configuration for jess to put data into a letter.

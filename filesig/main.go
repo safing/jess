@@ -6,7 +6,7 @@ import (
 
 	"github.com/safing/jess"
 	"github.com/safing/jess/lhash"
-	"github.com/safing/portbase/formats/dsd"
+	"github.com/safing/structures/dsd"
 )
 
 // Extension holds the default file extension to be used for signature files.

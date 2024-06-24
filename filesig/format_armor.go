@@ -7,7 +7,7 @@ import (
 	"regexp"
 
 	"github.com/safing/jess"
-	"github.com/safing/portbase/formats/dsd"
+	"github.com/safing/structures/dsd"
 )
 
 const (

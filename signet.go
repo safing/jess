@@ -11,7 +11,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/safing/jess/tools"
-	"github.com/safing/portbase/formats/dsd"
+	"github.com/safing/structures/dsd"
 )
 
 // Special signet types.

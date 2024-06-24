@@ -13,7 +13,7 @@ import (
 
 	"github.com/safing/jess"
 	"github.com/safing/jess/filesig"
-	"github.com/safing/portbase/container"
+	"github.com/safing/structures/container"
 )
 
 func init() {

@@ -8,7 +8,7 @@ import (
 	"math/big"
 
 	"github.com/safing/jess/tools"
-	"github.com/safing/portbase/container"
+	"github.com/safing/structures/container"
 )
 
 type rsaBase struct {

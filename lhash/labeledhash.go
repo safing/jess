@@ -12,7 +12,7 @@ import (
 
 	"github.com/mr-tron/base58"
 
-	"github.com/safing/portbase/container"
+	"github.com/safing/structures/container"
 )
 
 // LabeledHash represents a typed hash value.

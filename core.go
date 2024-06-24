@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/safing/portbase/container"
+	"github.com/safing/structures/container"
 )
 
 // Close encrypts (and possibly signs) the given data and returns a Letter. Storyline: Close takes an envelope, inserts the message and closes it, resulting in a letter.

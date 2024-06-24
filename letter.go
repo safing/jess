@@ -10,8 +10,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/safing/portbase/container"
-	"github.com/safing/portbase/formats/dsd"
+	"github.com/safing/structures/container"
+	"github.com/safing/structures/dsd"
 )
 
 // Letter is the data format for encrypted data at rest or in transit.

@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/safing/jess"
-	"github.com/safing/portbase/formats/dsd"
+	"github.com/safing/structures/dsd"
 )
 
 // WriteSignetToFile serializes the signet and writes it to the given file.
