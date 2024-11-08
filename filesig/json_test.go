@@ -4,6 +4,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/safing/jess"
+	"github.com/safing/jess/tools"
 )
 
 func TestJSONChecksums(t *testing.T) {
@@ -22,9 +26,9 @@ func TestJSONChecksums(t *testing.T) {
 `
 
 	testJSONWithChecksum, err := AddJSONChecksum([]byte(json))
-	assert.NoError(t, err, "should be able to add checksum")
+	require.NoError(t, err, "should be able to add checksum")
 	assert.Equal(t, jsonWithChecksum, string(testJSONWithChecksum), "should match")
-	assert.NoError(t,
+	require.NoError(t,
 		VerifyJSONChecksum(testJSONWithChecksum),
 		"checksum should be correct",
 	)
@@ -33,7 +37,7 @@ func TestJSONChecksums(t *testing.T) {
 	"c": 1,     "a":"b",
 		"_jess-checksum": "ZwtAd75qvioh6uf1NAq64KRgTbqeehFVYmhLmrwu1s7xJo"
 	}`
-	assert.NoError(t,
+	require.NoError(t,
 		VerifyJSONChecksum([]byte(jsonWithChecksum)),
 		"checksum should be correct",
 	)
@@ -48,7 +52,7 @@ func TestJSONChecksums(t *testing.T) {
 		"c": 1
 	 }
 	 `
-	assert.NoError(t,
+	require.NoError(t,
 		VerifyJSONChecksum([]byte(jsonWithMultiChecksum)),
 		"checksum should be correct",
 	)
@@ -61,9 +65,9 @@ func TestJSONChecksums(t *testing.T) {
 `
 
 	testJSONWithMultiChecksum, err := AddJSONChecksum([]byte(jsonWithMultiChecksum))
-	assert.NoError(t, err, "should be able to add checksum")
+	require.NoError(t, err, "should be able to add checksum")
 	assert.Equal(t, jsonWithMultiChecksumOutput, string(testJSONWithMultiChecksum), "should match")
-	assert.NoError(t,
+	require.NoError(t,
 		VerifyJSONChecksum(testJSONWithMultiChecksum),
 		"checksum should be correct",
 	)
@@ -116,4 +120,107 @@ func TestJSONChecksums(t *testing.T) {
 	// `
 	//
 	//	assert.Error(t, VerifyTextFileChecksum([]byte(textWithFailingChecksums), "#"), "should fail")
+}
+
+func TestJSONSignatures(t *testing.T) {
+	t.Parallel()
+
+	// Get tool for key generation.
+	tool, err := tools.Get("Ed25519")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Generate key pair.
+	s, err := getOrMakeSignet(t, tool.StaticLogic, false, "test-key-jsonsig-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// sBackup, err := s.Backup(true)
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
+	// t.Logf("signet: %s", sBackup)
+
+	// Make envelope.
+	envelope := jess.NewUnconfiguredEnvelope()
+	envelope.SuiteID = jess.SuiteSignV1
+	envelope.Senders = []*jess.Signet{s}
+
+	// Test 1: Simple json.
+
+	json := `{"a": "b", "c": 1}`
+	testJSONWithSignature, err := AddJSONSignature([]byte(json), envelope, testTrustStore)
+	require.NoError(t, err, "should be able to add signature")
+	require.NoError(t,
+		VerifyJSONSignature(testJSONWithSignature, testTrustStore),
+		"signature should be valid",
+	)
+
+	// Test 2: Prepared json with signature.
+
+	// Load signing key into trust store.
+	signingKey2, err := jess.SenderFromTextFormat(
+		"sender:2ZxXzzL3mc3mLPizTUe49zi8Z3NMbDrmmqJ4V9mL4AxefZ1o8pM8wPMuK2uW12Mvd3EJL9wsKTn14BDuqH2AtucvHTAkjDdZZ5YA9Azmji5tLRXmypvSxEj2mxXU3MFXBVdpzPdwRcE4WauLo9ZfQWebznvnatVLwuxmeo17tU2pL7",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rcptKey2, err := signingKey2.AsRecipient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := testTrustStore.StoreSignet(rcptKey2); err != nil {
+		t.Fatal(err)
+	}
+
+	// Verify data.
+	jsonWithSignature := `{
+			"c":1,"a":"b",
+			"_jess-signature": "Q6RnVmVyc2lvbgFnU3VpdGVJRGdzaWduX3YxZU5vbmNlRK6e7JhqU2lnbmF0dXJlc4GjZlNjaGVtZWdFZDI1NTE5YklEeBl0ZXN0LXN0YXRpYy1rZXktanNvbnNpZy0xZVZhbHVlWEBPEbeM4_CTl3OhNT2z74h38jIZG5R7BBLDFd6npJ3E-4JqM6TaSMa-2pPEBf3fDNuikR3ak45SekC6Z10uWiEB"
+		}`
+	require.NoError(t,
+		VerifyJSONSignature([]byte(jsonWithSignature), testTrustStore),
+		"signature should be valid",
+	)
+
+	// Test 3: Add signature to prepared json.
+
+	testJSONWithSignature, err = AddJSONSignature([]byte(jsonWithSignature), envelope, testTrustStore)
+	require.NoError(t, err, "should be able to add signature")
+	require.NoError(t,
+		VerifyJSONSignature(testJSONWithSignature, testTrustStore),
+		"signatures should be valid",
+	)
+
+	// Test 4: Prepared json with multiple signatures.
+
+	// Load signing key into trust store.
+	signingKey3, err := jess.SenderFromTextFormat(
+		"sender:2ZxXzzL3mc3mLPizTUe49zi8Z3NMbDrmmqJ4V9mL4AxefZ1o8pM8wPMuRAXdZNaPX3B96bhGCpww6TbXJ6WXLHoLwLV196cgdm1BurfTMdjUPa4PUj1KgHuM82b1p8ezQeryzj1CsjeM8KRQdh9YP87gwKpXNmLW5GmUyWG5KxzZ7W",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rcptKey3, err := signingKey3.AsRecipient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := testTrustStore.StoreSignet(rcptKey3); err != nil {
+		t.Fatal(err)
+	}
+
+	jsonWithMultiSig := `{
+			"_jess-signature": [
+				"Q6RnVmVyc2lvbgFnU3VpdGVJRGdzaWduX3YxZU5vbmNlRK6e7JhqU2lnbmF0dXJlc4GjZlNjaGVtZWdFZDI1NTE5YklEeBl0ZXN0LXN0YXRpYy1rZXktanNvbnNpZy0xZVZhbHVlWEBPEbeM4_CTl3OhNT2z74h38jIZG5R7BBLDFd6npJ3E-4JqM6TaSMa-2pPEBf3fDNuikR3ak45SekC6Z10uWiEB",
+				"Q6RnVmVyc2lvbgFnU3VpdGVJRGdzaWduX3YxZU5vbmNlRC32oylqU2lnbmF0dXJlc4GjZlNjaGVtZWdFZDI1NTE5YklEeBl0ZXN0LXN0YXRpYy1rZXktanNvbnNpZy0yZVZhbHVlWEDYVHeKaJvzZPOkgC6Tie6x70bNm2jtmJmAwDFDcBL1ddK7pVSefyAPg47xMO7jeucP5bw754P6CdrR5gyANJkM"
+			],
+			"a": "b",
+			"c": 1
+		 }
+		 `
+	assert.NoError(t,
+		VerifyJSONSignature([]byte(jsonWithMultiSig), testTrustStore),
+		"signatures should be valid",
+	)
 }

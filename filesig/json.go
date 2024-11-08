@@ -1,6 +1,7 @@
 package filesig
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 
@@ -9,7 +10,9 @@ import (
 	"github.com/tidwall/sjson"
 	"golang.org/x/exp/slices"
 
+	"github.com/safing/jess"
 	"github.com/safing/jess/lhash"
+	"github.com/safing/structures/dsd"
 )
 
 // JSON file metadata keys.
@@ -32,10 +35,10 @@ func AddJSONChecksum(data []byte) ([]byte, error) {
 	checksums = append(checksums, h.Base58())
 
 	// Sort and deduplicate checksums and sigs.
-	slices.Sort[[]string, string](checksums)
-	checksums = slices.Compact[[]string, string](checksums)
-	slices.Sort[[]string, string](signatures)
-	signatures = slices.Compact[[]string, string](signatures)
+	slices.Sort(checksums)
+	checksums = slices.Compact(checksums)
+	slices.Sort(signatures)
+	signatures = slices.Compact(signatures)
 
 	// Add metadata and return.
 	return jsonAddMeta(content, checksums, signatures)
@@ -67,6 +70,86 @@ func VerifyJSONChecksum(data []byte) error {
 	// Fail when no checksums were verified.
 	if checksumsVerified == 0 {
 		return ErrChecksumMissing
+	}
+
+	return nil
+}
+
+func AddJSONSignature(data []byte, envelope *jess.Envelope, trustStore jess.TrustStore) (signedData []byte, err error) {
+	// Create session.
+	session, err := envelope.Correspondence(trustStore)
+	if err != nil {
+		return nil, fmt.Errorf("invalid signing envelope: %w", err)
+	}
+
+	// Check if the envelope is suitable for signing.
+	if err := envelope.Suite().Provides.CheckComplianceTo(fileSigRequirements); err != nil {
+		return nil, fmt.Errorf("envelope not suitable for signing: %w", err)
+	}
+
+	// Extract content and metadata from json.
+	content, checksums, signatures, err := jsonSplit(data)
+	if err != nil {
+		return nil, fmt.Errorf("invalid json structure: %w", err)
+	}
+
+	// Sign data.
+	letter, err := session.Close(content)
+	if err != nil {
+		return nil, fmt.Errorf("sign: %w", err)
+	}
+
+	// Serialize signature and add it.
+	letter.Data = nil
+	sig, err := letter.ToDSD(dsd.CBOR)
+	if err != nil {
+		return nil, fmt.Errorf("serialize sig: %w", err)
+	}
+	signatures = append(signatures, base64.RawURLEncoding.EncodeToString(sig))
+
+	// Sort and deduplicate checksums and sigs.
+	slices.Sort(checksums)
+	checksums = slices.Compact(checksums)
+	slices.Sort(signatures)
+	signatures = slices.Compact(signatures)
+
+	// Add metadata and return.
+	return jsonAddMeta(data, checksums, signatures)
+}
+
+func VerifyJSONSignature(data []byte, trustStore jess.TrustStore) (err error) {
+	// Extract content and metadata from json.
+	content, _, signatures, err := jsonSplit(data)
+	if err != nil {
+		return fmt.Errorf("invalid json structure: %w", err)
+	}
+
+	var signaturesVerified int
+	for i, sig := range signatures {
+		// Deserialize signature.
+		sigData, err := base64.RawURLEncoding.DecodeString(sig)
+		if err != nil {
+			return fmt.Errorf("signature %d malformed: %w", i+1, err)
+		}
+		letter := &jess.Letter{}
+		_, err = dsd.Load(sigData, letter)
+		if err != nil {
+			return fmt.Errorf("signature %d malformed: %w", i+1, err)
+		}
+
+		// Verify signature.
+		letter.Data = content
+		err = letter.Verify(fileSigRequirements, trustStore)
+		if err != nil {
+			return fmt.Errorf("signature %d invalid: %w", i+1, err)
+		}
+
+		signaturesVerified++
+	}
+
+	// Fail when no signatures were verified.
+	if signaturesVerified == 0 {
+		return ErrSignatureMissing
 	}
 
 	return nil
@@ -187,10 +270,9 @@ func jsonAddMeta(data []byte, checksums, signatures []string) ([]byte, error) {
 
 	// Final pretty print.
 	data = pretty.PrettyOptions(data, &pretty.Options{
-		Width:    200,  // Must not change!
-		Prefix:   "",   // Must not change!
-		Indent:   " ",  // Must not change!
-		SortKeys: true, // Must not change!
+		Width:  200, // Must not change!
+		Prefix: "",  // Must not change!
+		Indent: " ", // Must not change!
 	})
 
 	return data, nil

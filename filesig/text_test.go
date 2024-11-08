@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTextChecksums(t *testing.T) {
@@ -29,20 +30,20 @@ do_something()
 `
 
 	testTextWithChecksumAfterComment, err := AddTextFileChecksum([]byte(text), "#", TextPlacementAfterComment)
-	assert.NoError(t, err, "should be able to add checksum")
+	require.NoError(t, err, "should be able to add checksum")
 	assert.Equal(t, textWithChecksumAfterComment, string(testTextWithChecksumAfterComment), "should match")
-	assert.NoError(t,
+	require.NoError(t,
 		VerifyTextFileChecksum(testTextWithChecksumAfterComment, "#"),
 		"checksum should be correct",
 	)
-	assert.NoError(t,
+	require.NoError(t,
 		VerifyTextFileChecksum(append(
 			[]byte("\n\n  \r\n"),
 			testTextWithChecksumAfterComment...,
 		), "#"),
 		"checksum should be correct",
 	)
-	assert.NoError(t,
+	require.NoError(t,
 		VerifyTextFileChecksum(append(
 			testTextWithChecksumAfterComment,
 			[]byte("\r\n \n \n")...,
@@ -62,9 +63,9 @@ do_something()
 `
 
 	testTextWithChecksumAtTop, err := AddTextFileChecksum([]byte(text), "#", TextPlacementTop)
-	assert.NoError(t, err, "should be able to add checksum")
+	require.NoError(t, err, "should be able to add checksum")
 	assert.Equal(t, textWithChecksumAtTop, string(testTextWithChecksumAtTop), "should match")
-	assert.NoError(t,
+	require.NoError(t,
 		VerifyTextFileChecksum(testTextWithChecksumAtTop, "#"),
 		"checksum should be correct",
 	)
@@ -82,9 +83,9 @@ do_something()
 `
 
 	testTextWithChecksumAtBottom, err := AddTextFileChecksum([]byte(text), "#", TextPlacementBottom)
-	assert.NoError(t, err, "should be able to add checksum")
+	require.NoError(t, err, "should be able to add checksum")
 	assert.Equal(t, textWithChecksumAtBottom, string(testTextWithChecksumAtBottom), "should match")
-	assert.NoError(t,
+	require.NoError(t,
 		VerifyTextFileChecksum(testTextWithChecksumAtBottom, "#"),
 		"checksum should be correct",
 	)
@@ -119,7 +120,7 @@ do_something()
 do_something()
 `
 	testTextWithMultiChecksumOutput, err := AddTextFileChecksum([]byte(textWithMultiChecksum), "#", TextPlacementAfterComment)
-	assert.NoError(t, err, "should be able to add checksum")
+	require.NoError(t, err, "should be able to add checksum")
 	assert.Equal(t, textWithMultiChecksumOutput, string(testTextWithMultiChecksumOutput), "should match")
 
 	// Test failing checksums.
@@ -135,7 +136,7 @@ do_something()
 
 do_something()
 `
-	assert.Error(t, VerifyTextFileChecksum([]byte(textWithFailingChecksums), "#"), "should fail")
+	require.Error(t, VerifyTextFileChecksum([]byte(textWithFailingChecksums), "#"), "should fail")
 }
 
 func TestLineEndDetection(t *testing.T) {

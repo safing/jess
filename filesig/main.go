@@ -53,7 +53,7 @@ func SignFileData(fileHash *lhash.LabeledHash, metaData map[string]string, envel
 
 	// Check if the envelope is suitable for signing.
 	if err := envelope.Suite().Provides.CheckComplianceTo(fileSigRequirements); err != nil {
-		return nil, nil, fmt.Errorf("envelope not suitable for signing")
+		return nil, nil, fmt.Errorf("envelope not suitable for signing: %w", err)
 	}
 
 	// Create struct and transform data into serializable format to be signed.
